@@ -1,0 +1,32 @@
+HTTP Range
+https://developer.mozilla.org/en-US/docs/Web/HTTP/Range_requests
+Allow sharee to resume download, skip/slice the offset on the sharer's side
+
+
+Transaction Flow:
+
+1. Sharer calls /share-file -> get on SharerPage
+2. Sharer selects file to share (+ options: passcode, personalizedSessionName)
+3. SharerPage make API call to server
+4. Server addes entry to FileTransferSessionMap 
+5. Server sends back URL with UUID that Sharer can give to Sharee
+6. Now Sharee need to go to ShareePage and enter the UUID + (passcode) 
+7. Once Sharee ?? websocket time... each GET is a new upload socket on the Sharer side
+8. 
+
+
+
+
+Global:
+
+FileTransferSessionMap (needs to be sync.Map concurrent access)
+
+
+File Stream Transaction:
+
+Uploader:
+1. Send POST uploadFile with fileName, fileSize
+
+
+
+Downloader

@@ -1,0 +1,28 @@
+<html>
+
+<head>
+    <title>File Transfer Test</title>
+</head>
+
+<body>
+    <div style="border: 2px solid black; padding: 1em; margin: 1em">
+        <div>File Upload (Websocket)</div>
+        <input id="fileSelector" type="file" name="uploadfile"/>
+
+        <button type="button" id="uploadBtn">Upload</button>
+    </div>
+
+    <div style="border: 2px solid black; padding: 1em; margin: 1em">
+        <div>File Download</div>
+
+        <label for="downloadFileName">File Name</label>
+        <input type="text" id="downloadFileName">
+
+        <button type="button" id="downloadBtn">Download</button>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

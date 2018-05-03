@@ -22,6 +22,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/send/{sessionID}", serv.Send)
 	r.HandleFunc("/receive/{sessionID}", serv.Receive)
+	r.HandleFunc("/info", serv.Info)
 
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", r)

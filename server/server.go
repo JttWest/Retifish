@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -120,9 +121,10 @@ func (s *Server) Receive(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
+	sessionInfo := session.Info()
 	writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
-	writer.Header().Set("Content-Disposition", "attachment; filename=\""+session.FileName+"\"")
-	writer.Header().Set("Content-Length", strconv.FormatInt(session.FileSize, 10))
+	writer.Header().Set("Content-Disposition", "attachment; filename=\""+sessionInfo.FileName+"\"")
+	writer.Header().Set("Content-Length", strconv.FormatInt(sessionInfo.FileSize, 10))
 	writer.WriteHeader(http.StatusOK) // TODO: allow for partial contents
 
 	for chunk := range receiveChan {
@@ -134,4 +136,22 @@ func (s *Server) Receive(writer http.ResponseWriter, request *http.Request) {
 			break
 		}
 	}
+}
+
+// TODO: must protect this endpoint in production
+func (s *Server) Info(writer http.ResponseWriter, request *http.Request) {
+	pass := request.URL.Query().Get("pass")
+	if pass != "fH23NL-9HadKHI(LKN23kfl" {
+		http.Error(writer, "", http.StatusUnauthorized)
+		return
+	}
+
+	response, err := json.Marshal(s.coreController.Info())
+	if err != nil {
+		http.Error(writer, "", http.StatusInternalServerError)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Write(response)
 }

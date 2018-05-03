@@ -2,8 +2,8 @@ package controller
 
 import (
 	"errors"
-	"file-sharing-test/message"
 	"file-sharing-test/model"
+	"file-sharing-test/model/message"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -31,7 +31,7 @@ func (c *Core) CreateTransferSession(conn *websocket.Conn, fileName, passcode st
 		FileName:     fileName,
 		FileSize:     fileSize,
 		Passcode:     passcode,
-		CreateTime:   time.Now().Unix(),
+		CreateTime:   time.Now(),
 		NumReceivers: 0,
 		SenderWS:     conn,
 	}
@@ -65,4 +65,8 @@ func (c *Core) GetFileTransferSession(sessionID string) (*model.FileTransferSess
 	}
 
 	return fts, nil
+}
+
+func (c *Core) Info() map[string]interface{} {
+	return c.sessionManager.Info()
 }

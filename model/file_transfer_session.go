@@ -1,8 +1,9 @@
 package model
 
 import (
+	"time"
 	"errors"
-	"file-sharing-test/message"
+	"file-sharing-test/model/message"
 	"file-sharing-test/util"
 	"log"
 	"sync"
@@ -16,21 +17,24 @@ type FileTransferSession struct {
 	FileName     string
 	FileSize     int64
 	Passcode     string // optional passcode to validate receiver
-	CreateTime   int64
+	CreateTime   time.Time
 	NumReceivers int
 	SenderWS     *websocket.Conn
 }
 
-type FileInfo struct {
-	FileName string
-	FileSize int64
+type fileTransferSessionInfo struct {
+	FileName     string
+	FileSize     int64
+	Passcode     string // optional passcode to validate receiver
+	CreateTime   time.Time
+	NumReceivers int
 }
 
-func (fts *FileTransferSession) Info() FileInfo {
+func (fts *FileTransferSession) Info() fileTransferSessionInfo {
 	fts.mu.RLock()
 	defer fts.mu.RUnlock()
 
-	return FileInfo{fts.FileName, fts.FileSize}
+	return fileTransferSessionInfo{fts.FileName, fts.FileSize, fts.Passcode, fts.CreateTime, fts.NumReceivers}
 }
 
 func (fts *FileTransferSession) IncReceiverCounter() {

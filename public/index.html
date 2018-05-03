@@ -6,17 +6,17 @@
 
 <body>
     <div style="border: 2px solid black; padding: 1em; margin: 1em">
-        <div>File Upload (Websocket)</div>
-        <input id="fileSelector" type="file" name="uploadfile"/>
+        <div>Send File</div>
+        <input id="fileSelector" type="file" name="sendFile"/>
 
-        <button type="button" id="uploadBtn">Upload</button>
+        <button type="button" id="sendFileBtn">Send</button>
     </div>
 
     <div style="border: 2px solid black; padding: 1em; margin: 1em">
-        <div>File Download</div>
+        <div>Receive File</div>
 
-        <label for="downloadFileName">File Name</label>
-        <input type="text" id="downloadFileName">
+        <label for="sessionID">Session ID</label>
+        <input type="text" id="sessionID">
 
         <button type="button" id="downloadBtn">Download</button>
     </div>

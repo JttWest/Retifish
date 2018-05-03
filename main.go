@@ -26,7 +26,7 @@ func main() {
 	r.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 	http.Handle("/", r)
 
-	fmt.Println("File storage node started on port", PORT)
+	fmt.Println("Server started on port", PORT)
 	err := http.ListenAndServe(fmt.Sprintf(":%v", PORT), nil)
 	if err != nil {
 		log.Fatal("Unable to create HTTP server: ", err)

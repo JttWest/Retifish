@@ -1,4 +1,4 @@
-package handler
+package server
 
 import (
 	"log"
@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"file-sharing-test/controller"
-	"file-sharing-test/model"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -33,10 +32,6 @@ var upgrader = websocket.Upgrader{
 // },
 }
 
-var readyUploadMessage = model.Message{Type: "readyUpload"}
-var chunkSavedMessage = model.Message{Type: "chunkSaved"}
-var uploadCompleteMessage = model.Message{Type: "uploadComplete"}
-
 func (s *Server) Send(writer http.ResponseWriter, request *http.Request) {
 	params := request.URL.Query()
 	fileName := params.Get("fileName")
@@ -61,7 +56,10 @@ func (s *Server) Send(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	sessionID_, err := s.coreController.CreateTransferSession(conn, fileName, passcode, fileSize64)
+	err = s.coreController.CreateTransferSession(conn, fileName, passcode, fileSize64)
+	if err != nil {
+		log.Println(err.Error())
+	}
 
 	// ReceiveFileData: // listen for file data in ws until endOfFile is received
 	// 	for {
@@ -110,7 +108,6 @@ func (s *Server) Receive(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 
-	// start goroutine to pull FileData into FilePump
 	session.IncReceiverCounter()
 	defer session.DecReceiverCounter()
 

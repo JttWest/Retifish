@@ -2,6 +2,8 @@ package model
 
 import (
 	"errors"
+	"file-sharing-test/message"
+	"file-sharing-test/util"
 	"log"
 	"sync"
 
@@ -10,10 +12,11 @@ import (
 
 // FileTransferSession is use to facilitate file transfer b/w sender and receiver
 type FileTransferSession struct {
-	sync.RWMutex
+	mu           sync.RWMutex
 	FileName     string
 	FileSize     int64
 	Passcode     string // optional passcode to validate receiver
+	CreateTime   int64
 	NumReceivers int
 	SenderWS     *websocket.Conn
 }
@@ -24,22 +27,22 @@ type FileInfo struct {
 }
 
 func (fts *FileTransferSession) Info() FileInfo {
-	fts.RLock()
-	defer fts.RUnlock()
+	fts.mu.RLock()
+	defer fts.mu.RUnlock()
 
 	return FileInfo{fts.FileName, fts.FileSize}
 }
 
 func (fts *FileTransferSession) IncReceiverCounter() {
-	fts.Lock()
-	defer fts.Unlock()
+	fts.mu.Lock()
+	defer fts.mu.Unlock()
 
 	fts.NumReceivers++
 }
 
 func (fts *FileTransferSession) DecReceiverCounter() {
-	fts.Lock()
-	defer fts.Unlock()
+	fts.mu.Lock()
+	defer fts.mu.Unlock()
 
 	if fts.NumReceivers == 0 {
 		log.Println("ReceiverCounter already 0")
@@ -49,21 +52,24 @@ func (fts *FileTransferSession) DecReceiverCounter() {
 	fts.NumReceivers--
 }
 
-var pullChunkMessage = Message{Type: "pullChunk"}
+//var pullChunkMessage = interface{}
 
-// pump will begin pulling file data [offsetByte, endByte) from sender and
+// pump will begin pulling file data [offsetByte, finishByte) from sender and
 // send each pulled chunk through receiverChan
-func (fts *FileTransferSession) pump(offsetByte, endByte int64, chunkSize int,
+func (fts *FileTransferSession) pump(offsetByte, finishByte int64, chunkSize int,
 	receiverChan chan<- []byte, shutdownPumpSignal <-chan bool) {
 
-	fts.RLock()
+	fts.mu.RLock()
 	sendWS := fts.SenderWS
-	fts.RUnlock()
+	fts.mu.RUnlock()
 
 	defer close(receiverChan) // done pulling chunks
 
-	for offsetByte < endByte {
-		if err := sendWS.WriteJSON(pullChunkMessage); err != nil {
+	var endByte int64
+	for offsetByte < finishByte {
+		endByte = util.MaxInt64(offsetByte+int64(chunkSize), finishByte)
+
+		if err := sendWS.WriteJSON(message.NewPullChunk(offsetByte, endByte)); err != nil {
 			return
 		}
 
@@ -88,7 +94,7 @@ func (fts *FileTransferSession) pump(offsetByte, endByte int64, chunkSize int,
 			return
 		}
 
-		offsetByte += int64(chunkSize)
+		offsetByte = endByte
 	}
 }
 

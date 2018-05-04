@@ -1,0 +1,29 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true,
+    "mocha": true,
+    "jquery": true
+  },
+  "extends": "airbnb",
+  "plugins": [
+    "react",
+    "jsx-a11y",
+    "import"
+  ],
+  "rules": {
+    "no-unused-expressions": ["error", { "allowTernary": true }],
+    "comma-dangle":"off",
+    "no-plusplus":"off",
+    "prefer-const":"off",
+    "curly":"off",
+    "no-mixed-operators":"off",
+    "camelcase":"warn",
+    "max-len":"off",
+    "no-param-reassign": ["error", { "props": false }],
+    "object-shorthand":"off",
+    "no-prototype-builtins":"off",
+    "no-use-before-define": ["error", { "functions": false }],
+    "no-bitwise":"warn"
+  }
+}

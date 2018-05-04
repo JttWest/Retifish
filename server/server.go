@@ -105,9 +105,11 @@ func (s *Server) Receive(writer http.ResponseWriter, request *http.Request) {
 
 	session, err := s.coreController.GetFileTransferSession(vars["sessionID"])
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(writer, "Failed to retrieve session", http.StatusBadRequest)
 		return
 	}
+	sessionInfo := session.Info()
 
 	session.IncReceiverCounter()
 	defer session.DecReceiverCounter()
@@ -115,13 +117,12 @@ func (s *Server) Receive(writer http.ResponseWriter, request *http.Request) {
 	shutdownPumpSignal := make(chan bool)
 	defer func() { shutdownPumpSignal <- true }()
 
-	receiveChan, err := session.ReceiveFileByPump(sessionID, 0, 1000*1024, shutdownPumpSignal)
+	receiveChan, err := session.ReceiveFileByPump(sessionID, 0, sessionInfo.FileSize, shutdownPumpSignal)
 	if err != nil {
 		http.Error(writer, "Unable to get file from sender", http.StatusBadRequest)
 		return
 	}
 
-	sessionInfo := session.Info()
 	writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
 	writer.Header().Set("Content-Disposition", "attachment; filename=\""+sessionInfo.FileName+"\"")
 	writer.Header().Set("Content-Length", strconv.FormatInt(sessionInfo.FileSize, 10))

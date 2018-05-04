@@ -46,9 +46,9 @@ func (c *Core) CreateTransferSession(conn *websocket.Conn, fileName, passcode st
 
 	c.sessionManager.AddTransferSession(sessionID, newSession)
 
+	oldCloseHandler := conn.CloseHandler()
 	newCloseHandler := func(code int, text string) error {
 		c.sessionManager.RemoveTransferSession(sessionID) // remove session
-		oldCloseHandler := conn.CloseHandler()
 
 		return oldCloseHandler(code, text)
 	}

@@ -20,7 +20,7 @@ func main() {
 	serv := server.New(controller.NewCore())
 
 	r := mux.NewRouter()
-	r.HandleFunc("/send/{sessionID}", serv.Send)
+	r.HandleFunc("/send", serv.Send)
 	r.HandleFunc("/receive/{sessionID}", serv.Receive)
 	r.HandleFunc("/info", serv.Info)
 

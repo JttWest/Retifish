@@ -1,12 +1,12 @@
 package model
 
 import (
-	"time"
 	"errors"
 	"file-sharing-test/model/message"
 	"file-sharing-test/util"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -56,35 +56,41 @@ func (fts *FileTransferSession) DecReceiverCounter() {
 	fts.NumReceivers--
 }
 
-//var pullChunkMessage = interface{}
-
 // pump will begin pulling file data [offsetByte, finishByte) from sender and
 // send each pulled chunk through receiverChan
 func (fts *FileTransferSession) pump(offsetByte, finishByte int64, chunkSize int,
 	receiverChan chan<- []byte, shutdownPumpSignal <-chan bool) {
 
 	fts.mu.RLock()
-	sendWS := fts.SenderWS
+	senderWS := fts.SenderWS
 	fts.mu.RUnlock()
 
 	defer close(receiverChan) // done pulling chunks
 
 	var endByte int64
 	for offsetByte < finishByte {
-		endByte = util.MaxInt64(offsetByte+int64(chunkSize), finishByte)
+		endByte = util.MinInt64(offsetByte+int64(chunkSize), finishByte)
+		log.Println("offsetByte:", offsetByte, "endByte:", endByte)
 
-		if err := sendWS.WriteJSON(message.NewPullChunk(offsetByte, endByte)); err != nil {
+		senderWS.SetWriteDeadline(time.Now().Add(10 * time.Second))
+		if err := senderWS.WriteJSON(message.NewPullChunk(offsetByte, endByte)); err != nil {
+			senderWS.Close()
 			return
 		}
 
-		messageType, wsData, err := sendWS.ReadMessage()
+		senderWS.SetReadDeadline(time.Now().Add(30 * time.Second))
+		messageType, wsData, err := senderWS.ReadMessage()
 		if err != nil {
+			log.Println("Failed to get respnse from pull command. Closing WS.")
+			log.Println(err.Error())
+			senderWS.Close()
 			return
 		}
 
 		if messageType == websocket.BinaryMessage {
 			if len(wsData) > chunkSize {
 				log.Println("File chunk data larger than chunk size!")
+				senderWS.Close()
 				return
 			}
 
@@ -94,7 +100,8 @@ func (fts *FileTransferSession) pump(offsetByte, finishByte int64, chunkSize int
 				return
 			}
 		} else {
-			log.Println("Non-binary data received in SenderUploadWS")
+			log.Println("Non-binary data received from senderWS")
+			senderWS.Close()
 			return
 		}
 

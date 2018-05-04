@@ -1,84 +1,104 @@
-$(document).ready(function () {
-    const baseUrl = window.location.href;
+$(document).ready(() => {
+  const baseUrl = window.location.href;
 
-    const downloadEndpoint = baseUrl + 'download';
+  const sendEndpoint = `${baseUrl}/send`;
+  const receiveEndpoint = `${baseUrl}/receive`;
 
-    $("#uploadBtn").click(chunkedUpload)
+  const sendFile = () => {
+    const file = document.getElementById('fileSelector').files[0];
 
-    const chunkedUpload = () => {
-        const choosenFile = document.getElementById('fileSelector').files[0];
+    console.log(file.name);
+    console.log(file.size);
 
-        console.log(choosenFile.name);
-        console.log(choosenFile.size);
+    const ws = new WebSocket(`ws://${document.location.host}/send?fileName=${file.name}&fileSize=${file.size}`);
 
-        const ws = new WebSocket("ws://" + document.location.host + "/upload");
-
-        ws.onopen = () => {
-            chunkFile(choosenFile,
-                chunk => ws.send(chunk),
-                () => ws.send(JSON.stringify({ type: 'endOfFile' }))
-            );
-
-            ws.onmessage = (payload) => {
-                const data = payload.data;
-                const message = JSON.parse(data);
-
-                console.log("Received: " + message.type)
-            }
-        }
-
-        // upload it thru websocket and check that it's being received
+    ws.onerror = (err) => {
+      console.log('cant open ws');
+      console.log(err);
     };
 
-    function chunkFile(file, chunkCB, doneCB) {
-        var fileSize = file.size;
-        var chunkSize = 1000 * 1024;
-        var offset = 0;
-        var chunkReaderBlock = null;
+    ws.onopen = () => {
+      console.log('Opened websocket');
 
-        const fileReader = new FileReader();
+      ws.onmessage = (payload) => {
+        const message = JSON.parse(payload.data);
 
-        var readEventHandler = function (evt) {
-            if (evt.target.error == null) {
-                offset += chunkSize;
-                chunkCB(evt.target.result); // callback for handling read chunk
-            } else {
-                console.log("Read error: " + evt.target.error);
-                return;
-            }
-            if (offset >= fileSize) {
-                console.log("Done reading file");
-                doneCB();
-                return;
-            }
+        console.log(`Received: ${JSON.stringify(message)}`);
+      };
+    };
 
-            // of to the next chunk
-            chunkReaderBlock(offset, chunkSize, file);
-        }
+    // ws.onopen = () => {
+    //   chunkFile(
+    //     choosenFile,
+    //     chunk => ws.send(chunk),
+    //     () => ws.send(JSON.stringify({ type: 'endOfFile' }))
+    //   );
 
-        chunkReaderBlock = function (_offset, length, _file) {
-            var blob = _file.slice(_offset, length + _offset);
-            fileReader.onload = readEventHandler;
-            fileReader.readAsArrayBuffer(blob);
-        }
+    //   ws.onmessage = (payload) => {
+    //     const data = payload.data;
+    //     const message = JSON.parse(data);
 
-        // now let's start the read with the first block
-        chunkReaderBlock(offset, chunkSize, file);
-    }
+    //     console.log(`Received: ${message.type}`);
+    //   };
+    // };
 
-    $("#downloadBtn").click(() => {
-        const downloadUrl = `${nodeUrl}????` // TODO
+    // upload it thru websocket and check that it's being received
+  };
 
-        const downloadLink = document.createElement('a');
-        downloadLink.setAttribute('href', encodeURI(downloadUrl));
-        downloadLink.setAttribute('download', '');
+  /*
+  function chunkFile(file, chunkCB, doneCB) {
+    let fileSize = file.size;
+    let chunkSize = 1000 * 1024;
+    let offset = 0;
+    let chunkReaderBlock = null;
 
-        downloadLink.style.display = 'none';
-        document.body.appendChild(downloadLink);
+    const fileReader = new FileReader();
 
-        downloadLink.click();
+    let readEventHandler = (evt) => {
+      if (evt.target.error == null) {
+        offset += chunkSize;
+        chunkCB(evt.target.result); // callback for handling read chunk
+      } else {
+        console.log(`Read error: ${evt.target.error}`);
+        return;
+      }
+      if (offset >= fileSize) {
+        console.log('Done reading file');
+        doneCB();
+        return;
+      }
 
-        document.body.removeChild(downloadLink);
-    });
+      // of to the next chunk
+      chunkReaderBlock(offset, chunkSize, file);
+    };
 
+    chunkReaderBlock = (_offset, length, _file) => {
+      let blob = _file.slice(_offset, length + _offset);
+      fileReader.onload = readEventHandler;
+      fileReader.readAsArrayBuffer(blob);
+    };
+
+    // now let's start the read with the first block
+    chunkReaderBlock(offset, chunkSize, file);
+  }
+  */
+
+  const receiveFile = () => {
+    const sessionID = $('#sessionID').val();
+    const downloadUrl = `${receiveEndpoint}/${sessionID}`;
+
+    const downloadLink = document.createElement('a');
+    downloadLink.setAttribute('href', encodeURI(downloadUrl));
+    downloadLink.setAttribute('download', '');
+
+    downloadLink.style.display = 'none';
+    document.body.appendChild(downloadLink);
+
+    downloadLink.click();
+
+    document.body.removeChild(downloadLink);
+  };
+
+  $('#sendFileBtn').click(sendFile);
+  $('#receiveBtn').click(receiveFile);
 });

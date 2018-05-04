@@ -11,6 +11,12 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const (
+	chunkSize = 500 * 1000
+	writeWait = 15 * time.Second
+	readWait = 60 * time.Second
+)
+
 // FileTransferSession is use to facilitate file transfer b/w sender and receiver
 type FileTransferSession struct {
 	mu           sync.RWMutex
@@ -60,28 +66,30 @@ func (fts *FileTransferSession) DecReceiverCounter() {
 // send each pulled chunk through receiverChan
 func (fts *FileTransferSession) pump(offsetByte, finishByte int64, chunkSize int,
 	receiverChan chan<- []byte, shutdownPumpSignal <-chan bool) {
-
+	
 	fts.mu.RLock()
 	senderWS := fts.SenderWS
 	fts.mu.RUnlock()
 
-	defer close(receiverChan) // done pulling chunks
-
+	defer func() {
+		close(receiverChan) // done pulling chunks
+	}()
+	
 	var endByte int64
 	for offsetByte < finishByte {
 		endByte = util.MinInt64(offsetByte+int64(chunkSize), finishByte)
 		log.Println("offsetByte:", offsetByte, "endByte:", endByte)
 
-		senderWS.SetWriteDeadline(time.Now().Add(10 * time.Second))
+		senderWS.SetWriteDeadline(time.Now().Add(writeWait))
 		if err := senderWS.WriteJSON(message.NewPullChunk(offsetByte, endByte)); err != nil {
 			senderWS.Close()
 			return
 		}
 
-		senderWS.SetReadDeadline(time.Now().Add(30 * time.Second))
+		senderWS.SetReadDeadline(time.Now().Add(readWait))
 		messageType, wsData, err := senderWS.ReadMessage()
 		if err != nil {
-			log.Println("Failed to get respnse from pull command. Closing WS.")
+			log.Println("Failed to get response from pull command. Closing WS.")
 			log.Println(err.Error())
 			senderWS.Close()
 			return
@@ -119,7 +127,7 @@ func (fts *FileTransferSession) ReceiveFileByPump(sessionID string, startByte, e
 	// create pump
 	receiverChan := make(chan []byte, 2)
 	// receiverChan will be close by the goroutine below
-	go fts.pump(startByte, endByte, 1000*1024, receiverChan, shutdownPumpSignal)
+	go fts.pump(startByte, endByte, chunkSize, receiverChan, shutdownPumpSignal)
 
 	// return pump
 	return receiverChan, nil

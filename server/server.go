@@ -131,15 +131,13 @@ func (s *Server) Receive(writer http.ResponseWriter, request *http.Request) {
 	for chunk := range receiveChan {
 		// chunk has been pulled; write to receiver
 		_, err := writer.Write(chunk)
-
 		if err != nil {
 			log.Println("Unable to write to receiver.")
 			log.Println(err)
 			return
 		}
+		writer.(http.Flusher).Flush()
 	}
-
-	writer.(http.Flusher).Flush()
 }
 
 // TODO: must protect this endpoint in production

@@ -24,9 +24,7 @@ module.exports = {
       favicon: '' // TODO
     }),
     new CircularDependencyPlugin({
-      // exclude detection of files based on a RegExp
       exclude: /node_modules/,
-      // add errors to webpack instead of warnings
       failOnError: true
     })
     // using CDN instead

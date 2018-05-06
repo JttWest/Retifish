@@ -24,6 +24,10 @@
     "object-shorthand":"off",
     "no-prototype-builtins":"off",
     "no-use-before-define": ["error", { "functions": false }],
-    "no-bitwise":"warn"
+    "no-bitwise":"warn",
+    "jsx-a11y/anchor-is-valid": [ "error", {
+      "components": [ "Link" ],
+      "specialLink": [ "to" ]
+    }]
   }
 }

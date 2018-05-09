@@ -1,4 +1,10 @@
 import React, { Component } from 'react';
+import { Segment, Button, Grid, Container } from 'semantic-ui-react';
+
+import AppHeader from './AppHeader';
+import FileSelector from './FileSelector';
+import SessionInfo from './SessionInfo';
+import FileInfo from './FileInfo';
 
 const sendEndpoint = document.location.hostname === 'localhost' ?
   'ws://localhost:9090/send' :
@@ -43,12 +49,13 @@ class Send extends Component {
     super(props);
 
     this.state = {
-      sessionID: '',
+      status: 'select', // select | transfer
+      sessionInfo: null,
       selectedFile: null
     };
 
     this.updateSelectedFile = this.updateSelectedFile.bind(this);
-    this.handleClick = this.handleClick.bind(this);
+    this.createTransferSession = this.createTransferSession.bind(this);
   }
 
   updateSelectedFile(file) {
@@ -57,7 +64,7 @@ class Send extends Component {
     });
   }
 
-  handleClick() {
+  createTransferSession() {
     const fileReader = new FileReader();
     const file = this.state.selectedFile;
 
@@ -80,7 +87,8 @@ class Send extends Component {
           case 'sessionInfo':
             handleSessionInfo(data);
             this.setState({
-              sessionID: data.sessionID
+              status: 'transfer',
+              sessionInfo: data
             });
             break;
           case 'pullChunk':
@@ -94,18 +102,34 @@ class Send extends Component {
   }
 
   render() {
+    const content = this.state.status === 'select' ?
+      (<FileSelector
+        handleSelectionChange={this.updateSelectedFile}
+      />) :
+      (<SessionInfo {...this.state.sessionInfo} />);
+
+    // const fileInfo = this.state.selectedFile ? <FileInfo file={this.state.selectedFile} /> : null;
+
     return (
-      <div style={{ border: '2px solid black', padding: '1em' }}>
-        <div>Send File</div>
-        <input
-          id="fileSelector"
-          type="file"
-          name="sendFile"
-          onChange={evt => this.updateSelectedFile(evt.target.files[0])}
-        />
-        <button type="button" id="sendFileBtn" onClick={this.handleClick}>Send</button>
-        <div>{this.state.sessionID ? `Current Session ID: ${this.state.sessionID}` : ''}</div>
-      </div>
+      <div>
+        <AppHeader pageTitle="Send" />
+        <Container>
+          <Segment>
+            <Grid centered>
+
+              <Grid.Row>
+                {content}
+              </Grid.Row>
+              <Grid.Row>
+                <FileInfo file={this.state.selectedFile} />
+              </Grid.Row>
+              <Grid.Row>
+                <Button onClick={this.createTransferSession}>Open Transfer Session</Button>
+              </Grid.Row>
+            </Grid>
+          </Segment>
+        </Container>
+      </div >
     );
   }
 }

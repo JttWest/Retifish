@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import AppHeader from './AppHeader';
+
 const downloadEndpoint = window.location.hostname === 'localhost' ?
   'http://localhost:9090/receive' :
   `${window.location.hostname}/receive`;
@@ -43,20 +45,23 @@ class Receive extends Component {
 
   render() {
     return (
-      <div style={{ border: '2px solid black', padding: '1em' }}>
-        <div>Receive File</div>
+      <div>
+        <AppHeader pageTitle="Receive" />
+        <div style={{ border: '2px solid black', padding: '1em' }}>
+          <div>Receive File</div>
 
-        <label htmlFor="sessionID">
-          Session ID
-          <input
-            type="text"
-            id="sessionID"
-            value={this.state.sessionID}
-            onChange={evt => this.updateSessionID(evt.target.value)}
-          />
-        </label>
+          <label htmlFor="sessionID">
+            Session ID
+            <input
+              type="text"
+              id="sessionID"
+              value={this.state.sessionID}
+              onChange={evt => this.updateSessionID(evt.target.value)}
+            />
+          </label>
 
-        <button type="button" id="receiveBtn" onClick={this.handleClick}>Receive</button>
+          <button type="button" id="receiveBtn" onClick={this.handleClick}>Receive</button>
+        </div>
       </div>
     );
   }

@@ -11,6 +11,7 @@ const App = () => (
     <Route exact path="/" component={Home} />
     <Route path="/send" component={Send} />
     <Route path="/receive" component={Receive} />
+    <Route path="/receive" component={Receive} />
     <Route path="*" component={NotFound} />
   </Switch >
 );

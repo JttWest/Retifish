@@ -1,5 +1,5 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from 'react'
+import PropTypes from 'prop-types'
 
 const SessionInfo = props => (
   <div>
@@ -11,13 +11,13 @@ const SessionInfo = props => (
     }
   </div>
 
-);
+)
 
 SessionInfo.propTypes = {
   sessionID: PropTypes.string.isRequired,
   fileName: PropTypes.string.isRequired,
   fileSize: PropTypes.number.isRequired,
   passcode: PropTypes.string
-};
+}
 
-export default SessionInfo;
+export default SessionInfo

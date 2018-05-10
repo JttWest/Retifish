@@ -1,10 +1,10 @@
-import React from 'react';
-import { Switch, Route } from 'react-router-dom';
+import React from 'react'
+import { Switch, Route } from 'react-router-dom'
 
-import Home from './Home';
-import Send from './Send';
-import Receive from './Receive';
-import NotFound from './NotFound';
+import Home from './Home'
+import Send from './Send'
+import Receive from './Receive'
+import NotFound from './NotFound'
 
 const App = () => (
   <Switch>
@@ -14,6 +14,6 @@ const App = () => (
     <Route path="/receive" component={Receive} />
     <Route path="*" component={NotFound} />
   </Switch >
-);
+)
 
-export default App;
+export default App

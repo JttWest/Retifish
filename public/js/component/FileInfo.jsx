@@ -1,7 +1,7 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import fileSizeFormat from 'filesize';
-import { Card, Table } from 'semantic-ui-react';
+import React from 'react'
+import PropTypes from 'prop-types'
+import fileSizeFormat from 'filesize'
+import { Card, Table } from 'semantic-ui-react'
 
 const FileInfo = props => (
   <Card>
@@ -27,7 +27,7 @@ const FileInfo = props => (
       </Card.Description>
     </Card.Content>
   </Card>
-);
+)
 
-export default FileInfo;
+export default FileInfo
 

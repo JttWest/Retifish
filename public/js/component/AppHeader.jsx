@@ -1,6 +1,6 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Header, Icon } from 'semantic-ui-react';
+import React from 'react'
+import PropTypes from 'prop-types'
+import { Header, Icon } from 'semantic-ui-react'
 
 const AppHeader = props => (
   <div>
@@ -11,10 +11,10 @@ const AppHeader = props => (
       </Header.Content>
     </Header>
   </div>
-);
+)
 
 AppHeader.propTypes = {
   pageTitle: PropTypes.string.isRequired
-};
+}
 
-export default AppHeader;
+export default AppHeader

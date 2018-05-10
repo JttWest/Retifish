@@ -1,46 +1,46 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
-import AppHeader from './AppHeader';
+import AppHeader from './AppHeader'
 
 const downloadEndpoint = window.location.hostname === 'localhost' ?
   'http://localhost:9090/receive' :
-  `${window.location.hostname}/receive`;
+  `${window.location.hostname}/receive`
 
 const downloadFile = (sessionID) => {
-  const downloadUrl = `${downloadEndpoint}/${sessionID}`;
+  const downloadUrl = `${downloadEndpoint}/${sessionID}`
 
-  const downloadLink = document.createElement('a');
-  downloadLink.setAttribute('href', encodeURI(downloadUrl));
-  downloadLink.setAttribute('download', '');
+  const downloadLink = document.createElement('a')
+  downloadLink.setAttribute('href', encodeURI(downloadUrl))
+  downloadLink.setAttribute('download', '')
 
-  downloadLink.style.display = 'none';
-  document.body.appendChild(downloadLink);
+  downloadLink.style.display = 'none'
+  document.body.appendChild(downloadLink)
 
-  downloadLink.click();
+  downloadLink.click()
 
-  document.body.removeChild(downloadLink);
-};
+  document.body.removeChild(downloadLink)
+}
 
 class Receive extends Component {
   constructor(props) {
-    super(props);
+    super(props)
 
     this.state = {
       sessionID: ''
-    };
+    }
 
-    this.updateSessionID = this.updateSessionID.bind(this);
-    this.handleClick = this.handleClick.bind(this);
+    this.updateSessionID = this.updateSessionID.bind(this)
+    this.handleClick = this.handleClick.bind(this)
   }
 
   updateSessionID(newSessionID) {
     this.setState({
       sessionID: newSessionID
-    });
+    })
   }
 
   handleClick() {
-    downloadFile(this.state.sessionID);
+    downloadFile(this.state.sessionID)
   }
 
   render() {
@@ -63,8 +63,8 @@ class Receive extends Component {
           <button type="button" id="receiveBtn" onClick={this.handleClick}>Receive</button>
         </div>
       </div>
-    );
+    )
   }
 }
 
-export default Receive;
+export default Receive

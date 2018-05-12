@@ -31,6 +31,7 @@
       "components": [ "Link" ],
       "specialLink": [ "to" ]
     }],
-    "react/require-default-props": "off"
+    "react/require-default-props": "off",
+    "react/no-multi-comp": "off"
   }
 }

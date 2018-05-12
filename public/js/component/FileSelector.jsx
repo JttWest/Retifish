@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Button } from 'semantic-ui-react'
+import { Button, Icon } from 'semantic-ui-react'
 
 
 class FileInput extends Component {
@@ -38,7 +38,10 @@ class FileInput extends Component {
             />
           </div>
         </label>
-        <Button onClick={evt => this.handleSelectClick(evt)}>Select File</Button>
+        <Button icon color="blue" labelPosition="right" onClick={evt => this.handleSelectClick(evt)}>
+          Select File
+          <Icon name="folder open" />
+        </Button>
       </div>
     )
   }

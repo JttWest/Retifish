@@ -30,4 +30,3 @@ const FileInfo = props => (
 )
 
 export default FileInfo
-

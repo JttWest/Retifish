@@ -1,9 +1,9 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CircularDependencyPlugin = require('circular-dependency-plugin');
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CircularDependencyPlugin = require('circular-dependency-plugin')
 
 module.exports = {
-  entry: './js/index.jsx',
+  entry: ['./js/index.jsx'],
   output: {
     path: path.join(__dirname, 'dist'),
     filename: 'bundle.js'
@@ -12,7 +12,7 @@ module.exports = {
     rules: [
       { test: /\.(js|jsx)$/, exclude: /node_modules/, use: ['babel-loader'] },
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-      { test: /\.(png|woff|woff2|eot|ttf|svg)$/, use: 'url-loader?limit=100000' }
+      { test: /\.(jpg|png|woff|woff2|eot|ttf|svg)$/, use: 'url-loader?limit=100000' }
     ]
   },
   resolve: {
@@ -37,4 +37,4 @@ module.exports = {
     contentBase: path.join(__dirname, 'dist'),
     historyApiFallback: true
   }
-};
+}

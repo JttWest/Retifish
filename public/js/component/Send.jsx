@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Segment, Button, Grid, Container, Label } from 'semantic-ui-react'
+import { Button, Grid, Icon, Container } from 'semantic-ui-react'
 
-import AppHeader from './AppHeader'
+import TransferPage from './TransferPage'
 import FileSelector from './FileSelector'
 import ShareStub from './ShareStub'
 import FileInfo from './FileInfo'
@@ -46,10 +46,30 @@ const handlePullChunk = (data, file, fileReader, ws) => {
 }
 
 const Step2ControlMenu = props => (
-  <Button.Group attached="bottom">
-    <Button onClick={props.handleNewSession} disabled={props.status === 'transfer'}>New Session</Button>
-    <Button onClick={props.handleTerminateSession} disabled={props.status === 'terminated'}>Terminate Session</Button>
-  </Button.Group>
+  <Container>
+    <Button
+      icon
+      color="blue"
+      labelPosition="right"
+      onClick={props.handleNewSession}
+      disabled={props.status === 'transfer'}
+    >
+      New Session
+      <Icon name="undo alternate" />
+    </Button>
+    <Button
+      icon
+      color="red"
+      labelPosition="right"
+      onClick={props.handleTerminateSession}
+      disabled={props.status === 'terminated'}
+    >
+      Terminate Session
+      <Icon name="exclamation triangle" />
+    </Button>
+    {/* <Button onClick={props.handleNewSession} disabled={props.status === 'transfer'}>New Session</Button> */}
+    {/* <Button onClick={props.handleTerminateSession} disabled={props.status === 'terminated'}>Terminate Session</Button> */}
+  </Container>
 )
 
 Step2ControlMenu.propTypes = {
@@ -152,10 +172,14 @@ class Send extends Component {
     const controlMenu = this.state.status === 'select' ?
       (
         <Button
+          icon
+          color="blue"
+          labelPosition="right"
           onClick={this.createTransferSession}
           disabled={!this.state.selectedFile}
         >
           Open Transfer Session
+          <Icon name="upload" />
         </Button>
       ) :
       (<Step2ControlMenu
@@ -165,25 +189,19 @@ class Send extends Component {
       />)
 
     return (
-      <div>
-        <AppHeader pageTitle="Send" />
-        <Container>
-          <Segment raised color="blue">
-            <Label color="green" ribbon>Home</Label>
-            <Grid centered>
-              <Grid.Row>
-                {topContent}
-              </Grid.Row>
-              <Grid.Row>
-                <FileInfo file={this.state.selectedFile} />
-              </Grid.Row>
-              <Grid.Row>
-                {controlMenu}
-              </Grid.Row>
-            </Grid>
-          </Segment>
-        </Container>
-      </div >
+      <TransferPage pageTitle="Send" color="blue">
+        <Grid centered>
+          <Grid.Row>
+            {topContent}
+          </Grid.Row>
+          <Grid.Row>
+            <FileInfo file={this.state.selectedFile} />
+          </Grid.Row>
+          <Grid.Row>
+            {controlMenu}
+          </Grid.Row>
+        </Grid>
+      </TransferPage>
     )
   }
 }

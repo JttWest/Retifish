@@ -1,9 +1,9 @@
 package controller
 
 import (
+	"file-sharing-test/model/websocket_broker"
 	"errors"
 	"file-sharing-test/model"
-	"file-sharing-test/model/message"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -20,11 +20,10 @@ func NewCore() *Core {
 	}
 }
 
-func (c *Core) CreateTransferSession(conn *websocket.Conn, fileName, passcode string, fileSize int64) error {
+func (c *Core) InitTransferSession(fileName, passcode string, fileSize int64) (string, error) {
 	randUUID, err := uuid.NewV4()
-
 	if err != nil {
-		return errors.New("failed to create UUID")
+		return "", errors.New("failed to create UUID")
 	}
 
 	newSession := &model.FileTransferSession{
@@ -32,20 +31,18 @@ func (c *Core) CreateTransferSession(conn *websocket.Conn, fileName, passcode st
 		FileSize:     fileSize,
 		Passcode:     passcode,
 		CreateTime:   time.Now(),
-		NumReceivers: 0,
-		SenderWS:     conn,
 	}
 
 	sessionID := randUUID.String()
-
-	// send session info thru sender WS
-	sessionInfoMessage := message.NewSessionInfo(sessionID, fileName, fileSize)
-	if err = conn.WriteJSON(sessionInfoMessage); err != nil {
-		return errors.New("failed to send session info")
-	}
-
 	c.sessionManager.AddTransferSession(sessionID, newSession)
 
+	// TODO: clear session after delay if SenderBroker is still nil
+
+	return sessionID, nil
+}
+
+func (c *Core) LoadSenderBroker(sessionID string, conn *websocket.Conn) error {
+	// set handler to remove transfer session on socket close
 	oldCloseHandler := conn.CloseHandler()
 	newCloseHandler := func(code int, text string) error {
 		c.sessionManager.RemoveTransferSession(sessionID) // remove session
@@ -53,6 +50,16 @@ func (c *Core) CreateTransferSession(conn *websocket.Conn, fileName, passcode st
 		return oldCloseHandler(code, text)
 	}
 	conn.SetCloseHandler(newCloseHandler)
+
+	// create SenderBroker
+	senderBroker := websocketbroker.New(conn)
+
+	if err := c.sessionManager.LoadSenderBroker(sessionID, senderBroker); err != nil {
+		return err
+	}
+
+	// start broker after it is loaded to prevent leak
+	senderBroker.Start()
 
 	return nil
 }

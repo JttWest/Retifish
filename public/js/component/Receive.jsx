@@ -15,27 +15,12 @@ const receiveEndpoint = window.location.hostname === 'localhost' ?
   'http://localhost:9090/receive' :
   `${window.location.hostname}/receive`
 
-// const downloadFile = (sessionID) => {
-//   const downloadUrl = `${downloadEndpoint}/${sessionID}`
-
-//   const downloadLink = document.createElement('a')
-//   downloadLink.setAttribute('href', encodeURI(downloadUrl))
-//   downloadLink.setAttribute('download', '')
-
-//   downloadLink.style.display = 'none'
-//   document.body.appendChild(downloadLink)
-
-//   downloadLink.click()
-
-//   document.body.removeChild(downloadLink)
-// }
-
 class ReceiveStep1 extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      sessionID: '',
+      sessionID: window.location.pathname.split('/receive/').pop() || '',
       loading: false
     }
 

@@ -2,19 +2,17 @@ package model
 
 import (
 	"errors"
-	"file-sharing-test/model/message"
+	"file-sharing-test/model/websocket_broker"
 	"file-sharing-test/util"
 	"log"
 	"sync"
 	"time"
-
-	"github.com/gorilla/websocket"
 )
 
 const (
 	chunkSize = 500 * 1000
 	writeWait = 15 * time.Second
-	readWait = 60 * time.Second
+	readWait  = 60 * time.Second
 )
 
 // FileTransferSession is use to facilitate file transfer b/w sender and receiver
@@ -24,8 +22,9 @@ type FileTransferSession struct {
 	FileSize     int64
 	Passcode     string // optional passcode to validate receiver
 	CreateTime   time.Time
-	NumReceivers int
-	SenderWS     *websocket.Conn
+	numReceivers int
+	// SenderWS     *websocket.Conn
+	senderBroker *websocketbroker.WebsocketBroker
 }
 
 type fileTransferSessionInfo struct {
@@ -40,76 +39,52 @@ func (fts *FileTransferSession) Info() fileTransferSessionInfo {
 	fts.mu.RLock()
 	defer fts.mu.RUnlock()
 
-	return fileTransferSessionInfo{fts.FileName, fts.FileSize, fts.Passcode, fts.CreateTime, fts.NumReceivers}
+	return fileTransferSessionInfo{fts.FileName, fts.FileSize, fts.Passcode, fts.CreateTime, fts.numReceivers}
 }
 
 func (fts *FileTransferSession) IncReceiverCounter() {
 	fts.mu.Lock()
 	defer fts.mu.Unlock()
 
-	fts.NumReceivers++
+	fts.numReceivers++
 }
 
 func (fts *FileTransferSession) DecReceiverCounter() {
 	fts.mu.Lock()
 	defer fts.mu.Unlock()
 
-	if fts.NumReceivers == 0 {
+	if fts.numReceivers == 0 {
 		log.Println("ReceiverCounter already 0")
-		return
+	} else {
+		fts.numReceivers--
 	}
-
-	fts.NumReceivers--
 }
 
 // pump will begin pulling file data [offsetByte, finishByte) from sender and
 // send each pulled chunk through receiverChan
 func (fts *FileTransferSession) pump(offsetByte, finishByte int64, chunkSize int,
-	receiverChan chan<- []byte, shutdownPumpSignal <-chan bool) {
-	
-	fts.mu.RLock()
-	senderWS := fts.SenderWS
-	fts.mu.RUnlock()
+	receiverChan chan<- []byte) {
+	defer close(receiverChan)
 
-	defer func() {
-		close(receiverChan) // done pulling chunks
-	}()
-	
+	log.Println("Pumping ->", "offsetByte:", offsetByte, "finishByte:", finishByte)
+
 	var endByte int64
 	for offsetByte < finishByte {
 		endByte = util.MinInt64(offsetByte+int64(chunkSize), finishByte)
-		log.Println("offsetByte:", offsetByte, "endByte:", endByte)
 
-		senderWS.SetWriteDeadline(time.Now().Add(writeWait))
-		if err := senderWS.WriteJSON(message.NewPullChunk(offsetByte, endByte)); err != nil {
-			senderWS.Close()
+		// send transaction to broker
+		chunk, ok := fts.senderBroker.SubmitTransaction(
+			websocketbroker.NewPullChunkMsg(offsetByte, endByte),
+			make(chan []byte))
+
+		if !ok {
 			return
 		}
 
-		senderWS.SetReadDeadline(time.Now().Add(readWait))
-		messageType, wsData, err := senderWS.ReadMessage()
-		if err != nil {
-			log.Println("Failed to get response from pull command. Closing WS.")
-			log.Println(err.Error())
-			senderWS.Close()
-			return
-		}
-
-		if messageType == websocket.BinaryMessage {
-			if len(wsData) > chunkSize {
-				log.Println("File chunk data larger than chunk size!")
-				senderWS.Close()
-				return
-			}
-
-			select {
-			case receiverChan <- wsData: // send chunk to receiver
-			case <-shutdownPumpSignal:
-				return
-			}
-		} else {
-			log.Println("Non-binary data received from senderWS")
-			senderWS.Close()
+		// pass result to receiver
+		select {
+		case receiverChan <- chunk:
+		case <-time.After(30 * time.Second):
 			return
 		}
 
@@ -117,17 +92,22 @@ func (fts *FileTransferSession) pump(offsetByte, finishByte int64, chunkSize int
 	}
 }
 
-func (fts *FileTransferSession) ReceiveFileByPump(sessionID string, startByte, endByte int64,
-	shutdownPumpSignal <-chan bool) (chan []byte, error) {
+func (fts *FileTransferSession) ReceiveFileByPump(sessionID string, startByte, endByte int64) (chan []byte, error) {
 
-	if fts.NumReceivers > 1 {
+	fts.mu.RLock()
+	if fts.numReceivers > 1 {
 		return nil, errors.New("only one receiver allow per session")
 	}
 
+	if fts.senderBroker == nil {
+		return nil, errors.New("session missing SenderBroker")
+	}
+	fts.mu.RUnlock()
+
 	// create pump
-	receiverChan := make(chan []byte, 2)
+	receiverChan := make(chan []byte, 1)
 	// receiverChan will be close by the goroutine below
-	go fts.pump(startByte, endByte, chunkSize, receiverChan, shutdownPumpSignal)
+	go fts.pump(startByte, endByte, chunkSize, receiverChan)
 
 	// return pump
 	return receiverChan, nil

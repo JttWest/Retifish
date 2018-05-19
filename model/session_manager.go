@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"file-sharing-test/model/websocket_broker"
 	"sync"
 )
 
@@ -50,4 +51,20 @@ func (sm *SessionManager) Info() map[string]interface{} {
 	}
 
 	return info
+}
+
+func (sm *SessionManager) LoadSenderBroker(sessionID string, senderBroker *websocketbroker.WebsocketBroker) error {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+
+	session, ok := sm.fileTransferSession[sessionID]
+	if !ok {
+		return errors.New("session doesn't exist")
+	} else if session.senderBroker != nil {
+		return errors.New("session already has a SenderBroker")
+	}
+	
+	session.senderBroker = senderBroker
+
+	return nil
 }

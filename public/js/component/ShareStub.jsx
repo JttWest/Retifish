@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Select, Segment, Header } from 'semantic-ui-react'
 
@@ -12,31 +12,78 @@ const copyToClipboard = (inputElement) => {
   document.execCommand('Copy')
 }
 
-const ShareStub = (props) => {
-  let inputRef = React.createRef()
+class ShareStub extends Component {
+  constructor(props) {
+    super(props)
 
-  return (
-    <Segment basic>
-      <Header size="medium">Share with your Receiver</Header>
-      <div className="ui action input">
-        <input type="text" defaultValue={props.sessionID} readOnly ref={inputRef} />
-        <Select
-          compact
-          options={options}
-          defaultValue="id"
-          readOnly
-        />
-        <Button
-          color="teal"
-          labelPosition="right"
-          content="Copy"
-          icon="copy"
-          onClick={() => copyToClipboard(inputRef.current)}
-        />
-      </div>
-    </Segment>
-  )
+    this.state = {
+      type: 'link' // link | id
+    }
+
+    this.displayRef = React.createRef()
+    this.handleSelect = this.handleSelect.bind(this)
+  }
+
+  handleSelect(_, { value }) {
+    this.setState({
+      type: value
+    })
+  }
+
+  render() {
+    const value = this.state.type === 'link' ?
+      `${window.location.protocol}//${window.location.host}/receive/${this.props.sessionID}` :
+      this.props.sessionID
+
+    return (
+      <Segment basic>
+        <Header size="medium">Share with your Receiver</Header>
+        <div className="ui action input">
+          <input type="text" value={value} readOnly ref={this.displayRef} />
+          <Select
+            compact
+            options={options}
+            defaultValue={this.state.type}
+            onChange={this.handleSelect}
+            readOnly
+          />
+          <Button
+            color="teal"
+            labelPosition="right"
+            content="Copy"
+            icon="copy"
+            onClick={() => copyToClipboard(this.displayRef.current)}
+          />
+        </div>
+      </Segment>
+    )
+  }
 }
+// const ShareStub = (props) => {
+//   let inputRef = React.createRef()
+
+//   return (
+//     <Segment basic>
+//       <Header size="medium">Share with your Receiver</Header>
+//       <div className="ui action input">
+//         <input type="text" defaultValue={props.sessionID} readOnly ref={inputRef} />
+//         <Select
+//           compact
+//           options={options}
+//           defaultValue="id"
+//           readOnly
+//         />
+//         <Button
+//           color="teal"
+//           labelPosition="right"
+//           content="Copy"
+//           icon="copy"
+//           onClick={() => copyToClipboard(inputRef.current)}
+//         />
+//       </div>
+//     </Segment>
+//   )
+// }
 
 ShareStub.propTypes = {
   sessionID: PropTypes.string.isRequired

@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Grid, Icon, Container } from 'semantic-ui-react'
+import axios from 'axios'
 
 import TransferPage from './TransferPage'
 import FileSelector from './FileSelector'
 import ShareStub from './ShareStub'
 import FileInfo from './FileInfo'
 
-const sendEndpoint = document.location.hostname === 'localhost' ?
-  'ws://localhost:9090/send' :
-  `ws://${document.location.host}/send`
+const host = window.location.hostname === 'localhost' ? 'localhost:9090' : window.location.host
+const initSendEndpoint = `${window.location.protocol}//${host}/send`
+const wsSendEndpoint = `ws://${host}/send` // TODO: pick ws/wss dynamically
 
 const readBlobAsArrayBuffer = (blob, fileReader = undefined) => {
   const reader = fileReader || new FileReader()
@@ -27,10 +28,6 @@ const readBlobAsArrayBuffer = (blob, fileReader = undefined) => {
   })
 }
 
-const handleSessionInfo = (data) => {
-  console.log(JSON.stringify(data, null, 2))
-}
-
 const handlePullChunk = (data, file, fileReader, ws) => {
   const { startByte, endByte } = data
 
@@ -44,6 +41,38 @@ const handlePullChunk = (data, file, fileReader, ws) => {
       console.log(err)
     })
 }
+
+const establishSenderWS = (sessionID, file) => (
+  new Promise((resolve, reject) => {
+    const fileReader = new FileReader()
+    const ws = new WebSocket(`${wsSendEndpoint}?sessionID=${sessionID}`)
+
+    ws.onerror = (err) => {
+      console.log(err)
+      reject(err)
+    }
+
+    ws.onopen = () => {
+      console.log('Opened websocket')
+
+      ws.onmessage = (payload) => {
+        const message = JSON.parse(payload.data)
+
+        const { type, data } = message
+
+        switch (type) {
+          case 'pullChunk':
+            handlePullChunk(data, file, fileReader, ws)
+            break
+          default:
+            throw new Error(`Unknown message type ${message.type}`)
+        }
+      }
+
+      resolve(ws)
+    }
+  })
+)
 
 const Step2ControlMenu = props => (
   <Container>
@@ -84,10 +113,11 @@ class Send extends Component {
 
     this.state = {
       status: 'select', // select | transfer | terminated
-      sessionInfo: null,
-      selectedFile: null,
-      senderWS: null
+      sessionID: null,
+      selectedFile: null
     }
+
+    this.senderWS = null
 
     this.updateSelectedFile = this.updateSelectedFile.bind(this)
     this.createTransferSession = this.createTransferSession.bind(this)
@@ -101,60 +131,37 @@ class Send extends Component {
     })
   }
 
-  createTransferSession() {
-    const fileReader = new FileReader()
+  async createTransferSession() {
     const file = this.state.selectedFile
 
-    const ws = new WebSocket(`${sendEndpoint}?fileName=${file.name}&fileSize=${file.size}`)
+    try {
+      const resp = await axios.post(`${initSendEndpoint}?fileName=${file.name}&fileSize=${file.size}`)
+      const ws = await establishSenderWS(resp.data.sessionID, file)
 
-    ws.onerror = (err) => {
-      alert('Error: unable to create transfer session.')
-      console.log(err)
-    }
-
-    ws.onopen = () => {
-      console.log('Opened websocket')
-
-      ws.onmessage = (payload) => {
-        const message = JSON.parse(payload.data)
-
-        const { type, data } = message
-
-        switch (type) {
-          case 'sessionInfo':
-            handleSessionInfo(data)
-            this.setState({
-              status: 'transfer',
-              sessionInfo: data,
-              senderWS: ws
-            })
-            break
-          case 'pullChunk':
-            handlePullChunk(data, file, fileReader, ws)
-            break
-          default:
-            throw new Error(`Unknown message type ${message.type}`)
-        }
-      }
+      this.senderWS = ws
+      this.setState({
+        status: 'transfer',
+        sessionID: resp.data.sessionID
+      })
+    } catch (e) {
+      console.log('Fail to create transfer session')
+      console.log(e)
     }
   }
 
   newSession() {
     this.setState({
       status: 'select',
-      sessionInfo: null,
-      selectedFile: null,
-      senderWS: null
+      selectedFile: null
     })
   }
 
   terminateSession() {
-    if (this.state.senderWS)
-      this.state.senderWS.close()
+    if (this.senderWS)
+      this.senderWS.close()
 
     this.setState({
-      status: 'terminated',
-      senderWS: null
+      status: 'terminated'
     })
   }
 
@@ -166,7 +173,7 @@ class Send extends Component {
         />
       ) :
       (
-        <ShareStub sessionID={this.state.sessionInfo.sessionID} />
+        <ShareStub sessionID={this.state.sessionID} />
       )
 
     const controlMenu = this.state.status === 'select' ?

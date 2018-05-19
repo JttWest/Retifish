@@ -3,10 +3,11 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CircularDependencyPlugin = require('circular-dependency-plugin')
 
 module.exports = {
-  entry: ['./js/index.jsx'],
+  entry: ['babel-polyfill', './js/index.jsx'],
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'bundle.js'
+    filename: 'bundle.js',
+    publicPath: '/'
   },
   module: {
     rules: [
@@ -27,11 +28,6 @@ module.exports = {
       exclude: /node_modules/,
       failOnError: true
     })
-    // using CDN instead
-    // new webpack.ProvidePlugin({ // global import jQuery on client-side
-    //   $: 'jquery',
-    //   jQuery: 'jquery'
-    // }
   ],
   devServer: {
     contentBase: path.join(__dirname, 'dist'),

@@ -19,8 +19,12 @@ class ReceiveStep1 extends Component {
   constructor(props) {
     super(props)
 
+    let sessionID = window.location.pathname.split('/').pop()
+    if (!sessionID || !sessionID.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/))
+      sessionID = ''
+
     this.state = {
-      sessionID: window.location.pathname.split('/receive/').pop() || '',
+      sessionID: sessionID,
       loading: false
     }
 
@@ -46,6 +50,7 @@ class ReceiveStep1 extends Component {
       { cancelToken: this.cancelSource.token }
     )
       .then((resp) => {
+        // TODO: push url to history
         this.setState({ loading: false })
         this.props.onSuccess(resp.data)
       })

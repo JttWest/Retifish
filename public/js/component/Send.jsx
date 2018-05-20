@@ -84,7 +84,7 @@ const Step2ControlMenu = props => (
       disabled={props.status === 'transfer'}
     >
       New Session
-      <Icon name="undo alternate" />
+      <Icon name="undo" />
     </Button>
     <Button
       icon
@@ -94,7 +94,7 @@ const Step2ControlMenu = props => (
       disabled={props.status === 'terminated'}
     >
       Terminate Session
-      <Icon name="exclamation triangle" />
+      <Icon name="shutdown" />
     </Button>
     {/* <Button onClick={props.handleNewSession} disabled={props.status === 'transfer'}>New Session</Button> */}
     {/* <Button onClick={props.handleTerminateSession} disabled={props.status === 'terminated'}>Terminate Session</Button> */}

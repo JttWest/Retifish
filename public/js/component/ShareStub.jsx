@@ -59,31 +59,6 @@ class ShareStub extends Component {
     )
   }
 }
-// const ShareStub = (props) => {
-//   let inputRef = React.createRef()
-
-//   return (
-//     <Segment basic>
-//       <Header size="medium">Share with your Receiver</Header>
-//       <div className="ui action input">
-//         <input type="text" defaultValue={props.sessionID} readOnly ref={inputRef} />
-//         <Select
-//           compact
-//           options={options}
-//           defaultValue="id"
-//           readOnly
-//         />
-//         <Button
-//           color="teal"
-//           labelPosition="right"
-//           content="Copy"
-//           icon="copy"
-//           onClick={() => copyToClipboard(inputRef.current)}
-//         />
-//       </div>
-//     </Segment>
-//   )
-// }
 
 ShareStub.propTypes = {
   sessionID: PropTypes.string.isRequired

@@ -8,12 +8,12 @@ import FileInfo from './FileInfo'
 
 
 const downloadEndpoint = window.location.hostname === 'localhost' ?
-  'http://localhost:9090/download' :
-  `${window.location.hostname}/download`
+  'http://localhost:9090/api/download' :
+  `https://${window.location.host}/api/download`
 
 const receiveEndpoint = window.location.hostname === 'localhost' ?
-  'http://localhost:9090/receive' :
-  `${window.location.hostname}/receive`
+  'http://localhost:9090/api/receive' :
+  `https://${window.location.host}/api/receive`
 
 class ReceiveStep1 extends Component {
   constructor(props) {

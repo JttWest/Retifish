@@ -26,13 +26,16 @@ func main() {
 	// TODO: put these in a router package inside server
 	router := mux.NewRouter()
 
-	router.HandleFunc("/send", serv.InitSendHanlder()).Methods("POST")
-	router.HandleFunc("/send", serv.WSSendHanlder()).Methods("GET")
-	router.HandleFunc("/receive/{sessionID}", serv.Receive()).Methods("GET")
-	router.HandleFunc("/download/{sessionID}", serv.Download()).Methods("GET")
-	router.HandleFunc("/info", serv.Info()).Methods("GET")
+	apiRouter := router.PathPrefix("/api").Subrouter()
+	apiRouter.HandleFunc("/send", serv.InitSendHanlder()).Methods("POST")
+	apiRouter.HandleFunc("/receive/{sessionID}", serv.Receive()).Methods("GET")
+	apiRouter.HandleFunc("/download/{sessionID}", serv.Download()).Methods("GET")
+	apiRouter.HandleFunc("/info", serv.Info()).Methods("GET")
 
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
+	wsRouter := router.PathPrefix("/websocket").Subrouter()
+	wsRouter.HandleFunc("/send", serv.WSSendHanlder()).Methods("GET")
+
+	// router.PathPrefix("/").Handler(http.FileServer(http.Dir("public/")))
 
 	// TODO: make this a middleware
 	// func setupResponse(w *http.ResponseWriter, req *http.Request) {

@@ -8,9 +8,13 @@ import FileSelector from './FileSelector'
 import ShareStub from './ShareStub'
 import FileInfo from './FileInfo'
 
-const host = window.location.hostname === 'localhost' ? 'localhost:9090' : window.location.host
-const initSendEndpoint = `${window.location.protocol}//${host}/send`
-const wsSendEndpoint = `ws://${host}/send` // TODO: pick ws/wss dynamically
+const initSendEndpoint = window.location.hostname === 'localhost' ?
+  'http://localhost:9090/api/send' :
+  `https://${window.location.host}/api/send`
+
+const wsSendEndpoint = window.location.hostname === 'localhost' ?
+  'ws://localhost:9090/websocket/send' :
+  `wss://${window.location.host}/websocket/send`
 
 const readBlobAsArrayBuffer = (blob, fileReader = undefined) => {
   const reader = fileReader || new FileReader()

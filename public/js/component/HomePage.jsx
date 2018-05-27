@@ -15,6 +15,8 @@ import {
   Segment,
   Sidebar,
   Visibility,
+  Tab,
+  Ref
 } from 'semantic-ui-react'
 
 const MainContent = ({ mobile }) => (
@@ -22,7 +24,6 @@ const MainContent = ({ mobile }) => (
     <Header
       as="h1"
       content="Retifish"
-      inverted
       style={{
         fontSize: mobile ? '2em' : '4em',
         fontWeight: 'bold',
@@ -33,8 +34,7 @@ const MainContent = ({ mobile }) => (
     />
     <Header
       as="h2"
-      content="Share any file up to 1GB with anyone for free in your browser."
-      inverted
+      content="Share any file up to 5GB for free in your browser."
       style={{
         fontSize: mobile ? '1.5em' : '1.7em',
         fontWeight: 'normal',
@@ -42,7 +42,7 @@ const MainContent = ({ mobile }) => (
       }}
     />
 
-    <Button.Group fluid size="large" widths={2}>
+    <Button.Group fluid size="huge" widths={2}>
       <Button as={Link} to="/send" color="blue">Send</Button>
       <Icon /> {/* used to create a dummy divider */}
       <Button as={Link} to="/receive" color="orange">Receive</Button>
@@ -51,7 +51,43 @@ const MainContent = ({ mobile }) => (
 )
 
 MainContent.propTypes = {
-  mobile: PropTypes.bool,
+  mobile: PropTypes.bool
+}
+
+class InfoSection extends Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      selectedTab: 0
+    }
+
+    this.handleClick = this.handleClick.bind(this)
+  }
+
+  handleClick(index) {
+    return () => { this.setState({ selectedTab: index }) }
+  }
+
+  render() {
+    const { info } = this.props
+    return (
+      <Container text>
+        <Button.Group fluid color="purple" attached="top" widths={info.length}>
+          {info.map(i => (
+            <Button key={i.index} onClick={this.handleClick(i.index)} active={this.state.selectedTab === i.index}>{i.labelName}</Button>
+          ))}
+        </Button.Group>
+        <Segment attached padded inverted color="purple">
+          {info[this.state.selectedTab].text}
+        </Segment>
+      </Container>
+    )
+  }
+}
+
+InfoSection.propTypes = {
+  info: PropTypes.array.isRequired
 }
 
 /* Heads up!
@@ -77,13 +113,18 @@ class DesktopContainer extends Component {
 
   render() {
     const { children } = this.props
-    const { fixed } = this.state
 
+    const info = [
+      { index: 0, labelName: 'Free', text: 'Both sending and receiving files are completely free with no hidden fees.' },
+      { index: 1, labelName: 'Secure', text: 'All file transfer is protected with TLS protocol. Moreover, only a small chunk of your file is stored on the server at any given time, which will be cleared once the transfer is over.' },
+      { index: 2, labelName: 'Simple', text: 'No account required. No additional dependencies to download.' },
+      { index: 3, labelName: 'Fast', text: 'Unlike traditional file sharing where the whole file must be uploaded before the receiver can begin downloading, this app allows file upload and download to happen simultaneously.' },
+    ]
     return (
       <Responsive>
         <Visibility once={false} onBottomPassed={this.showFixedMenu} onBottomPassedReverse={this.hideFixedMenu}>
-          <Segment inverted textAlign="center" style={{ minHeight: 700, padding: '1em 0em' }} vertical>
-            <Menu
+          <Segment textAlign="center" vertical>
+            {/* <Menu
               fixed={fixed ? 'top' : null}
               inverted={!fixed}
               pointing={!fixed}
@@ -95,8 +136,10 @@ class DesktopContainer extends Component {
                 <Menu.Item as="a">About</Menu.Item>
                 <Menu.Item as="a">Contact</Menu.Item>
               </Container>
-            </Menu>
+            </Menu> */}
             <MainContent />
+            <Divider hidden />
+            <InfoSection info={info} />
           </Segment>
         </Visibility>
 

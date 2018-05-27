@@ -2,8 +2,8 @@ package model
 
 import (
 	"errors"
-	"file-sharing-test/model/websocket_broker"
-	"file-sharing-test/util"
+	"retifish/server/model/websocket_broker"
+	"retifish/server/util"
 	"log"
 	"sync"
 	"time"

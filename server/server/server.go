@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"file-sharing-test/controller"
+	"retifish/server/controller"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"

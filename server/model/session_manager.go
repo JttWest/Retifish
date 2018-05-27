@@ -2,7 +2,7 @@ package model
 
 import (
 	"errors"
-	"file-sharing-test/model/websocket_broker"
+	"retifish/server/model/websocket_broker"
 	"sync"
 )
 

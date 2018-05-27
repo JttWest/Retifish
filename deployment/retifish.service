@@ -1,0 +1,31 @@
+# place in /lib/systemd/system
+
+[Unit]
+Description=retifish
+ConditionPathExists=/home/retifish/retifish_server
+After=network.target
+ 
+[Service]
+Type=simple
+User=retifish
+Group=retifish
+LimitNOFILE=1024
+
+Restart=on-failure
+RestartSec=10
+startLimitIntervalSec=60
+
+WorkingDirectory=/home/retifish
+ExecStart=/home/retifish/retifish_server
+
+# make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/retifish
+ExecStartPre=/bin/chown syslog:adm /var/log/retifish
+ExecStartPre=/bin/chmod 755 /var/log/retifish
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=retifish
+ 
+[Install]
+WantedBy=multi-user.target

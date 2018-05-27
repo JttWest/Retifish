@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"file-sharing-test/model/websocket_broker"
+	"retifish/server/model/websocket_broker"
 	"errors"
-	"file-sharing-test/model"
+	"retifish/server/model"
 	"time"
 
 	"github.com/gorilla/websocket"

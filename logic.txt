@@ -24,3 +24,17 @@ service.retifish.com/api
 service.retifish.com/websocket
     /send
     /receive
+
+Configs
+    Server
+        port
+        maxTransferSessions
+        senderConnectWsTimeout
+
+    Client
+
+
+    Shared
+        maxFileSize
+        chunkSize?
+        wsTimeout?

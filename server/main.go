@@ -1,8 +1,8 @@
 package main
 
 import (
-	"file-sharing-test/controller"
-	"file-sharing-test/server"
+	"retifish/server/controller"
+	"retifish/server/server"
 	"flag"
 	"fmt"
 	"log"

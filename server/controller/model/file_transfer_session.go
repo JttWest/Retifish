@@ -3,9 +3,9 @@ package model
 import (
 	"errors"
 	"log"
+	"retifish/server/config"
 	"retifish/server/controller/model/websocket_broker"
 	"retifish/server/util"
-	"retifish/server/config"
 	"sync"
 	"time"
 )
@@ -25,7 +25,6 @@ type FileTransferSession struct {
 	Passcode     string // optional passcode to validate receiver
 	CreateTime   time.Time
 	numReceivers int
-	// SenderWS     *websocket.Conn
 	senderBroker *websocketbroker.WebsocketBroker
 }
 
@@ -35,6 +34,25 @@ type fileTransferSessionInfo struct {
 	Passcode     string // optional passcode to validate receiver
 	CreateTime   time.Time
 	NumReceivers int
+}
+
+func (fts *FileTransferSession) HasSenderBroker() bool {
+	fts.mu.RLock()
+	defer fts.mu.RUnlock()
+
+	return fts.senderBroker != nil
+}
+
+func (fts *FileTransferSession) LoadSenderBroker(senderBroker *websocketbroker.WebsocketBroker) error {
+	fts.mu.Lock()
+	defer fts.mu.Unlock()
+
+	if fts.senderBroker != nil {
+		return errors.New("session already has a SenderBroker")
+	}
+
+	fts.senderBroker = senderBroker
+	return nil
 }
 
 func (fts *FileTransferSession) Info() fileTransferSessionInfo {

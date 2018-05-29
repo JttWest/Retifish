@@ -2,9 +2,10 @@ package model
 
 import (
 	"errors"
-	"retifish/server/controller/model/websocket_broker"
 	"retifish/server/config"
+	"retifish/server/controller/model/websocket_broker"
 	"sync"
+	"time"
 )
 
 type SessionManager struct {
@@ -22,6 +23,21 @@ func (sm *SessionManager) AddTransferSession(sessionID string, fts *FileTransfer
 
 	if len(sm.fileTransferSessions) < config.Values.MaxTransferSessions {
 		sm.fileTransferSessions[sessionID] = fts
+
+		// remove session if sender didn't connect WS in time
+		go func() {
+			time.Sleep(config.Values.SenderConnectWsTimeoutS * time.Second)
+
+			session, err := sm.GetTransferSession(sessionID)
+			if err != nil {
+				return
+			}
+
+			if !session.HasSenderBroker() {
+				sm.RemoveTransferSession(sessionID)
+			}
+		}()
+
 		return nil
 	}
 
@@ -66,11 +82,8 @@ func (sm *SessionManager) LoadSenderBroker(sessionID string, senderBroker *webso
 	session, ok := sm.fileTransferSessions[sessionID]
 	if !ok {
 		return errors.New("session doesn't exist")
-	} else if session.senderBroker != nil {
-		return errors.New("session already has a SenderBroker")
 	}
 
-	session.senderBroker = senderBroker
-
-	return nil
+	// return err or nil from LoadSenderBroker
+	return session.LoadSenderBroker(senderBroker)
 }

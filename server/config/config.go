@@ -3,15 +3,16 @@ package config
 import (
 	"log"
 	"reflect"
+	"time"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
-	Port                   string
-	MaxTransferSessions    int
-	SenderConnectWsTimeout int
-	TransferChunkSize      int
+	Port                    string
+	MaxTransferSessions     int
+	SenderConnectWsTimeoutS time.Duration
+	TransferChunkSize       int
 }
 
 var Values Config

@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"retifish/server/controller/model/websocket_broker"
 	"errors"
 	"retifish/server/controller/model"
+	"retifish/server/controller/model/websocket_broker"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -27,17 +27,16 @@ func (c *Core) InitTransferSession(fileName, passcode string, fileSize int64) (s
 	}
 
 	newSession := &model.FileTransferSession{
-		FileName:     fileName,
-		FileSize:     fileSize,
-		Passcode:     passcode,
-		CreateTime:   time.Now(),
+		FileName:   fileName,
+		FileSize:   fileSize,
+		Passcode:   passcode,
+		CreateTime: time.Now(),
 	}
 
 	sessionID := randUUID.String()
 	if err := c.sessionManager.AddTransferSession(sessionID, newSession); err != nil {
 		return "", err
 	}
-	// TODO: clear session after delay if SenderBroker is still nil
 
 	return sessionID, nil
 }

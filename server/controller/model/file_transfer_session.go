@@ -2,18 +2,20 @@ package model
 
 import (
 	"errors"
-	"retifish/server/model/websocket_broker"
-	"retifish/server/util"
 	"log"
+	"retifish/server/controller/model/websocket_broker"
+	"retifish/server/util"
+	"retifish/server/config"
 	"sync"
 	"time"
 )
 
 const (
-	chunkSize = 500 * 1000
 	writeWait = 15 * time.Second
 	readWait  = 60 * time.Second
 )
+
+var chunkSize = config.Values.TransferChunkSize
 
 // FileTransferSession is use to facilitate file transfer b/w sender and receiver
 type FileTransferSession struct {

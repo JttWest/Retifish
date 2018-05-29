@@ -22,6 +22,23 @@ func New(coreController *controller.Core) *Server {
 	return &Server{coreController}
 }
 
+func respondJSON(writer http.ResponseWriter, reponseBody interface{}, responseCode int) {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(responseCode)
+	if err := json.NewEncoder(writer).Encode(&reponseBody); err != nil {
+		log.Println(err.Error())
+	}
+}
+
+// TODO
+func respondError(writer http.ResponseWriter, reponseBody interface{}, responseCode int) {
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(responseCode)
+	if err := json.NewEncoder(writer).Encode(&reponseBody); err != nil {
+		log.Println(err.Error())
+	}
+}
+
 func (s *Server) InitSendHanlder() http.HandlerFunc {
 	type response struct {
 		SessionID string `json:"sessionID"`

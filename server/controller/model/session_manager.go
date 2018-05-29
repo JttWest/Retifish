@@ -2,38 +2,44 @@ package model
 
 import (
 	"errors"
-	"retifish/server/model/websocket_broker"
+	"retifish/server/controller/model/websocket_broker"
+	"retifish/server/config"
 	"sync"
 )
 
 type SessionManager struct {
-	mu                  sync.RWMutex
-	fileTransferSession map[string]*FileTransferSession
+	mu                   sync.RWMutex
+	fileTransferSessions map[string]*FileTransferSession
 }
 
 func NewSessionManager() *SessionManager {
 	return &SessionManager{sync.RWMutex{}, make(map[string]*FileTransferSession)}
 }
 
-func (sm *SessionManager) AddTransferSession(sessionID string, fts *FileTransferSession) {
+func (sm *SessionManager) AddTransferSession(sessionID string, fts *FileTransferSession) error {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
-	sm.fileTransferSession[sessionID] = fts
+	if len(sm.fileTransferSessions) < config.Values.MaxTransferSessions {
+		sm.fileTransferSessions[sessionID] = fts
+		return nil
+	}
+
+	return errors.New("server is at maximum transfer capacity")
 }
 
 func (sm *SessionManager) RemoveTransferSession(sessionID string) {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
-	delete(sm.fileTransferSession, sessionID)
+	delete(sm.fileTransferSessions, sessionID)
 }
 
 func (sm *SessionManager) GetTransferSession(sessionID string) (*FileTransferSession, error) {
 	sm.mu.RLock()
 	defer sm.mu.RUnlock()
 
-	if session, ok := sm.fileTransferSession[sessionID]; ok {
+	if session, ok := sm.fileTransferSessions[sessionID]; ok {
 		return session, nil
 	}
 
@@ -46,7 +52,7 @@ func (sm *SessionManager) Info() map[string]interface{} {
 
 	info := make(map[string]interface{})
 
-	for sessionID, session := range sm.fileTransferSession {
+	for sessionID, session := range sm.fileTransferSessions {
 		info[sessionID] = session.Info()
 	}
 
@@ -57,13 +63,13 @@ func (sm *SessionManager) LoadSenderBroker(sessionID string, senderBroker *webso
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
-	session, ok := sm.fileTransferSession[sessionID]
+	session, ok := sm.fileTransferSessions[sessionID]
 	if !ok {
 		return errors.New("session doesn't exist")
 	} else if session.senderBroker != nil {
 		return errors.New("session already has a SenderBroker")
 	}
-	
+
 	session.senderBroker = senderBroker
 
 	return nil

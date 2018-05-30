@@ -73,12 +73,12 @@ class InfoSection extends Component {
     const { info } = this.props
     return (
       <Container text>
-        <Button.Group fluid color="purple" attached="top" widths={info.length}>
+        <Button.Group fluid color="black" attached="top" widths={info.length}>
           {info.map(i => (
             <Button key={i.index} onClick={this.handleClick(i.index)} active={this.state.selectedTab === i.index}>{i.labelName}</Button>
           ))}
         </Button.Group>
-        <Segment attached padded inverted color="purple">
+        <Segment attached padded inverted>
           {info[this.state.selectedTab].text}
         </Segment>
       </Container>

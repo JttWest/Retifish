@@ -38,3 +38,21 @@ Configs
         maxFileSize
         chunkSize?
         wsTimeout?
+
+
+TODO taks until MVP:
+config
+	X create folder and files
+	X add in server
+	- add in client
+
+error handling
+	X error server
+	error client (display)
+
+create logging
+	server
+
+fix server endpoints
+
+cleanup client UI

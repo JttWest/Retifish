@@ -15,14 +15,13 @@ func respondJSON(writer http.ResponseWriter, responseCode int, reponseBody inter
 }
 
 type errResponse struct {
-	Message string `json:"sessionID"`
-	Display bool   `json:"display"`
+	Message string `json:"message"`
 }
 
 func respondError(writer http.ResponseWriter, responseCode int, message string) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(responseCode)
-	if err := json.NewEncoder(writer).Encode(&errResponse{message, true}); err != nil {
+	if err := json.NewEncoder(writer).Encode(&errResponse{message}); err != nil {
 		log.Println(err.Error())
 	}
 }

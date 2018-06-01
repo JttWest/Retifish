@@ -163,19 +163,10 @@ func (s *Server) Download() http.HandlerFunc {
 func (s *Server) Info() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		pass := request.URL.Query().Get("pass")
-		if pass != "fH23NL-9HadKHI(LKN23kfl" {
+		if pass != "D2zJXjQ69WH8xnwxRyNUCkj2axmF4lKb2" {
 			http.Error(writer, "", http.StatusUnauthorized)
 			return
 		}
-
-		// response, err := json.Marshal(s.coreController.Info())
-		// if err != nil {
-		// 	http.Error(writer, "", http.StatusInternalServerError)
-		// 	return
-		// }
-
-		// writer.Header().Set("Content-Type", "application/json")
-		// writer.Write(response)
 
 		respondJSON(writer, http.StatusOK, s.coreController.Info())
 	}

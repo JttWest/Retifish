@@ -3,9 +3,10 @@ import PropTypes from 'prop-types'
 import { Input, Button, Grid } from 'semantic-ui-react'
 import axios from 'axios'
 
-import TransferPage from './TransferPage'
+import ShareContainer from './ShareContainer'
 import FileInfo from './FileInfo'
 
+import error from '../lib/error'
 
 const downloadEndpoint = window.location.hostname === 'localhost' ?
   'http://localhost:9090/api/download' :
@@ -57,7 +58,7 @@ class ReceiveStep1 extends Component {
       .catch((err) => {
         if (!axios.isCancel(err)) {
           this.setState({ loading: false })
-          this.props.onFail(err.response)
+          this.props.onFail(err.response && err.response.data)
         }
       })
   }
@@ -103,7 +104,6 @@ const ReceiveStep2 = props => (
           content="Download"
           icon="download"
           labelPosition="right"
-        // loading={this.state.loading}
         />
       </a>
     </Grid.Row>
@@ -122,7 +122,8 @@ class Receive extends Component {
     this.state = {
       step: 1,
       sessionID: '',
-      file: null
+      file: null,
+      message: null
     }
 
     this.ableToUpdateState = false
@@ -147,22 +148,21 @@ class Receive extends Component {
           name: sessionInfo.fileName,
           size: sessionInfo.fileSize,
           type: sessionInfo.fileType
-        }
+        },
+        message: null
       })
     }
   }
 
-  handleStep1Fail(resp) {
+  handleStep1Fail(err) {
     if (this.ableToUpdateState) {
       this.setState({
         step: 1,
         sessionID: '',
-        file: null
+        file: null,
+        message: error.parseMessage(err)
       })
     }
-
-    if (resp)
-      console.log(resp)
   }
 
   render() {
@@ -171,9 +171,9 @@ class Receive extends Component {
       (<ReceiveStep2 file={this.state.file} sessionID={this.state.sessionID} />)
 
     return (
-      <TransferPage pageTitle="Receive" color="orange">
+      <ShareContainer pageTitle="Receive" color="orange" message={this.state.message}>
         {content}
-      </TransferPage >
+      </ShareContainer >
     )
   }
 }

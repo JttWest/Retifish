@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Button, Icon } from 'semantic-ui-react'
 
-
 class FileInput extends Component {
   constructor(props) {
     super(props)
@@ -38,7 +37,13 @@ class FileInput extends Component {
             />
           </div>
         </label>
-        <Button icon color="blue" labelPosition="right" onClick={evt => this.handleSelectClick(evt)}>
+        <Button
+          icon
+          color="blue"
+          labelPosition="right"
+          onClick={evt => this.handleSelectClick(evt)}
+          disabled={this.props.disabled}
+        >
           Select File
           <Icon name="folder open" />
         </Button>
@@ -48,12 +53,13 @@ class FileInput extends Component {
 }
 
 FileInput.propTypes = {
-  handleSelectionChange: PropTypes.func.isRequired
+  handleSelectionChange: PropTypes.func.isRequired,
+  disabled: PropTypes.bool.isRequired
 }
 
 const FileSelector = props => (
   <div>
-    <FileInput handleSelectionChange={props.handleSelectionChange} />
+    <FileInput {...props} />
   </div>
 )
 

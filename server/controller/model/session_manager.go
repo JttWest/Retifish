@@ -41,7 +41,7 @@ func (sm *SessionManager) AddTransferSession(sessionID string, fts *FileTransfer
 		return nil
 	}
 
-	return errors.New("server is at maximum transfer capacity")
+	return errors.New("max transfer capacity")
 }
 
 func (sm *SessionManager) RemoveTransferSession(sessionID string) {

@@ -118,7 +118,7 @@ class DesktopContainer extends Component {
       { index: 0, labelName: 'Free', text: 'Both sending and receiving files are completely free with no hidden fees.' },
       { index: 1, labelName: 'Secure', text: 'All file transfer is protected with TLS protocol. Moreover, only a small chunk of your file is stored on the server at any given time, which will be cleared once the transfer is over.' },
       { index: 2, labelName: 'Simple', text: 'No account required. No additional dependencies to download.' },
-      { index: 3, labelName: 'Fast', text: 'Unlike traditional file sharing where the whole file must be uploaded before the receiver can begin downloading, this app allows file upload and download to happen simultaneously.' },
+      { index: 3, labelName: 'Fast', text: 'Unlike traditional file sharing where the whole file must be uploaded before the receiver can begin downloading, this app allows simultaneously file upload and download.' },
     ]
     return (
       <Responsive>

@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import fileSizeFormat from 'filesize'
-import { Card, Input, Grid } from 'semantic-ui-react'
+import { Card, Input, Grid, Divider } from 'semantic-ui-react'
 
 const labelWidth = 4
 const valueWidth = 12
@@ -12,11 +12,12 @@ const FileInfo = props => (
       <Card.Header>
         File Information
       </Card.Header>
+      <Divider />
       <Card.Description>
         <Grid>
           <Grid.Row>
             <Grid.Column width={labelWidth}>
-              NAME
+              Name
             </Grid.Column>
             <Grid.Column width={valueWidth}>
               <Input value={props.file ? props.file.name : ''} fluid transparent />
@@ -24,7 +25,7 @@ const FileInfo = props => (
           </Grid.Row>
           <Grid.Row>
             <Grid.Column width={labelWidth}>
-              SIZE
+              Size
             </Grid.Column>
             <Grid.Column width={valueWidth}>
               <Input value={props.file ? fileSizeFormat(props.file.size) : ''} fluid transparent />
@@ -32,7 +33,7 @@ const FileInfo = props => (
           </Grid.Row>
           <Grid.Row>
             <Grid.Column width={labelWidth}>
-              TYPE
+              Type
             </Grid.Column>
             <Grid.Column width={valueWidth}>
               <Input value={props.file ? props.file.type : null} fluid transparent />

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-import { Segment, Label, Header, Icon, Container, Message, Button } from 'semantic-ui-react'
+import { Segment, Container, Header, Icon, Message, Button } from 'semantic-ui-react'
 
 const TransferHeader = props => (
   <Segment textAlign="center" basic>
@@ -36,15 +36,15 @@ const ShareContainer = (props) => {
       <TransferHeader pageTitle={pageTitle} color={color} />
       <Container text>
         <Segment raised color={color}>
-          <Button as={Link} to="/" icon floated="left" color="yellow" disabled={homeDisabled}>
+          <Button as={Link} to="/" icon floated="left" color="yellow" disabled={homeDisabled} >
             <Icon name="home" size="large" />
           </Button>
-
           {children}
           {messageDisplay}
         </Segment>
       </Container>
     </div >
+
   )
 }
 

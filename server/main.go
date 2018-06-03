@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"retifish/server/config"
 	"retifish/server/controller"
+	log "retifish/server/logger"
 	"retifish/server/server"
 
 	"github.com/gorilla/handlers"
@@ -13,8 +13,11 @@ import (
 )
 
 func main() {
-	// initialize logger
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	// setup logger
+	log.SetLevel(config.Values.LogLevel)
+	if config.Values.LogToFile {
+		log.SetLogToFile("retifish.log")
+	}
 
 	serv := server.New(controller.NewCore())
 
@@ -35,9 +38,9 @@ func main() {
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	serverHandler := handlers.CORS(originsOk, headersOk, methodsOk)(router)
 
-	log.Println("Server started on port", config.Values.Port)
+	log.Info("Server started on port", config.Values.Port)
 	err := http.ListenAndServe(fmt.Sprintf(":%v", config.Values.Port), serverHandler)
 	if err != nil {
-		log.Fatal("Unable to create HTTP server: ", err)
+		log.Fatal("Unable to create HTTP server:", err.Error())
 	}
 }

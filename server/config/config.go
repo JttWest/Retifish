@@ -1,8 +1,9 @@
 package config
 
 import (
-	"log"
 	"reflect"
+	log "retifish/server/logger"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
@@ -13,6 +14,8 @@ type Config struct {
 	MaxTransferSessions     int
 	SenderConnectWsTimeoutS time.Duration
 	TransferChunkSize       int
+	LogLevel                int
+	LogToFile               bool
 }
 
 var Values Config
@@ -25,16 +28,16 @@ func init() {
 	viper.AddConfigPath(".") // optionally look for config in the working directory
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	if err := viper.Unmarshal(&Values); err != nil {
-		log.Fatalln(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	// check for any unset config values
 	if v := getUnsetValues(); len(v) != 0 {
-		log.Fatalln("Missing config:", v)
+		log.Fatal("Missing config:", strings.Join(v, ","))
 	}
 }
 

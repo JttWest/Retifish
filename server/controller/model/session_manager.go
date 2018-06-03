@@ -41,7 +41,7 @@ func (sm *SessionManager) AddTransferSession(sessionID string, fts *FileTransfer
 		return nil
 	}
 
-	return errors.New("max transfer capacity")
+	return errors.New("max transfer sessions reached")
 }
 
 func (sm *SessionManager) RemoveTransferSession(sessionID string) {
@@ -76,12 +76,10 @@ func (sm *SessionManager) Info() map[string]interface{} {
 }
 
 func (sm *SessionManager) LoadSenderBroker(sessionID string, senderBroker *websocketbroker.WebsocketBroker) error {
-	sm.mu.Lock()
-	defer sm.mu.Unlock()
-
-	session, ok := sm.fileTransferSessions[sessionID]
-	if !ok {
-		return errors.New("session doesn't exist")
+	// GetTransferSession already locks so don't lock again
+	session, err := sm.GetTransferSession(sessionID)
+	if err != nil {
+		return err
 	}
 
 	// return err or nil from LoadSenderBroker

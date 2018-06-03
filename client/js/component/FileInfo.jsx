@@ -1,7 +1,10 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import fileSizeFormat from 'filesize'
-import { Card, Table } from 'semantic-ui-react'
+import { Card, Input, Grid } from 'semantic-ui-react'
+
+const labelWidth = 4
+const valueWidth = 12
 
 const FileInfo = props => (
   <Card>
@@ -10,20 +13,32 @@ const FileInfo = props => (
         File Information
       </Card.Header>
       <Card.Description>
-        <Table celled>
-          <Table.Row>
-            <Table.Cell>Name</Table.Cell>
-            <Table.Cell>{props.file ? props.file.name : null}</Table.Cell>
-          </Table.Row>
-          <Table.Row>
-            <Table.Cell>Size</Table.Cell>
-            <Table.Cell>{props.file ? fileSizeFormat(props.file.size) : null}</Table.Cell>
-          </Table.Row>
-          <Table.Row>
-            <Table.Cell>Type</Table.Cell>
-            <Table.Cell>{props.file ? props.file.type : null}</Table.Cell>
-          </Table.Row>
-        </Table>
+        <Grid>
+          <Grid.Row>
+            <Grid.Column width={labelWidth}>
+              NAME
+            </Grid.Column>
+            <Grid.Column width={valueWidth}>
+              <Input value={props.file ? props.file.name : ''} fluid transparent />
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column width={labelWidth}>
+              SIZE
+            </Grid.Column>
+            <Grid.Column width={valueWidth}>
+              <Input value={props.file ? fileSizeFormat(props.file.size) : ''} fluid transparent />
+            </Grid.Column>
+          </Grid.Row>
+          <Grid.Row>
+            <Grid.Column width={labelWidth}>
+              TYPE
+            </Grid.Column>
+            <Grid.Column width={valueWidth}>
+              <Input value={props.file ? props.file.type : null} fluid transparent />
+            </Grid.Column>
+          </Grid.Row>
+        </Grid>
       </Card.Description>
     </Card.Content>
   </Card>

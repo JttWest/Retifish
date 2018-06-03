@@ -1,10 +1,11 @@
 package model
 
 import (
+	"fmt"
 	"errors"
-	"log"
 	"retifish/server/config"
 	"retifish/server/controller/model/websocket_broker"
+	log "retifish/server/logger"
 	"retifish/server/util"
 	"sync"
 	"time"
@@ -74,7 +75,7 @@ func (fts *FileTransferSession) DecReceiverCounter() {
 	defer fts.mu.Unlock()
 
 	if fts.numReceivers == 0 {
-		log.Println("ReceiverCounter already 0")
+		log.Warn("Attempting to decrement ReceiverCounter when it's already 0")
 	} else {
 		fts.numReceivers--
 	}
@@ -86,7 +87,7 @@ func (fts *FileTransferSession) pump(offsetByte, finishByte int64, chunkSize int
 	receiverChan chan<- []byte) {
 	defer close(receiverChan)
 
-	log.Println("Pumping ->", "offsetByte:", offsetByte, "finishByte:", finishByte)
+	log.Info(fmt.Sprintf("Pumping %v (%v - %v)", fts.FileName, offsetByte, finishByte))
 
 	var endByte int64
 	for offsetByte < finishByte {

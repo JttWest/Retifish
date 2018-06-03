@@ -51,8 +51,8 @@ error handling
 	X error client (display)
 
 create logging
-    client
-	server
+	X server
+    - client
 
 fix server endpoints
 

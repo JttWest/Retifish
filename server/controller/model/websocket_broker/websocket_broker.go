@@ -1,7 +1,7 @@
 package websocketbroker
 
 import (
-	"log"
+	log "retifish/server/logger"
 	"sync"
 	"time"
 
@@ -92,7 +92,7 @@ func (b *WebsocketBroker) Start() {
 
 		// TODO: can remove this after a few test runs
 		if len(b.transactions) > 0 {
-			log.Println("Error: transactions not cleared.")
+			log.Error("WebsocketBroker transactions not cleared after shutdown and cleanup")
 		}
 	}()
 
@@ -104,7 +104,7 @@ func (b *WebsocketBroker) Start() {
 			if transaction.result != nil {
 				select {
 				case <-time.After(transactionResultWait):
-					log.Println("Error: Transaction result tiemout")
+					log.Error("WebsocketBroker transaction result tiemout")
 					return
 				case payload, ok := <-readMessages:
 					if !ok {
@@ -136,24 +136,23 @@ func (b *WebsocketBroker) readRoutine(readMessages chan<- []byte) {
 
 		messageType, payload, err := b.conn.ReadMessage()
 		if err != nil {
-			log.Println(err.Error())
 			return
 		}
 
 		if messageType == websocket.BinaryMessage {
 			if len(payload) > maxMessageSize {
-				log.Println("Data larger than chunk size!")
+				log.Warn("Terminating WS because client message too large")
 				return
 			}
 
 			select {
 			case readMessages <- payload:
 			default:
-				log.Println("Error: Full binaryIncMessages")
+				log.Error("WebsocketBroker has full binaryIncMessages")
 				return
 			}
 		} else {
-			log.Println("Error: Non-binary data received from WS")
+			log.Error("Non-binary data received from WS")
 			return
 		}
 	}
@@ -174,7 +173,7 @@ func (b *WebsocketBroker) writeRoutine(writeMessages <-chan *message) {
 		case message := <-writeMessages:
 			b.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := b.conn.WriteJSON(message); err != nil {
-				log.Println(err.Error())
+				log.Warn("Unable to write to client WS:", err.Error())
 				return
 			}
 		}

@@ -1,9 +1,8 @@
 package server
 
 import (
-	"fmt"
-	"log"
 	"net/http"
+	log "retifish/server/logger"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -22,27 +21,21 @@ func (s *Server) InitSendHanlder() http.HandlerFunc {
 		passcode := params.Get("passcode")
 
 		if fileName == "" || fileSize == "" {
-			http.Error(writer, "Insufficient url parameters.", http.StatusBadRequest)
+			respondError(writer, http.StatusBadRequest, "Insufficient parameters.")
 			return
 		}
 
 		fileSize64, err := strconv.ParseInt(fileSize, 10, 64)
 		if err != nil || fileSize64 <= 0 || fileSize64 > 1073741824 {
-			http.Error(writer, "Invalid file size.", http.StatusBadRequest)
+			respondError(writer, http.StatusBadRequest, "Invalid file size.")
 			return
 		}
 
 		sessionID, err := s.coreController.InitTransferSession(fileName, passcode, fileSize64)
 		if err != nil {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
+			respondError(writer, http.StatusInternalServerError, decodeError(err))
 			return
 		}
-
-		// writer.Header().Set("Content-Type", "application/json")
-		// writer.WriteHeader(http.StatusCreated)
-		// if err = json.NewEncoder(writer).Encode(&response{sessionID}); err != nil {
-		// 	log.Println(err.Error())
-		// }
 
 		respondJSON(writer, http.StatusCreated, response{sessionID})
 	}
@@ -51,9 +44,7 @@ func (s *Server) InitSendHanlder() http.HandlerFunc {
 func (s *Server) WSSendHanlder() http.HandlerFunc {
 	upgrader := websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
-			fmt.Printf("Accepting client from remote address %v\n", r.RemoteAddr)
 			return true
-
 			// TODO: add return false when session invalid or in used
 		},
 	}
@@ -70,12 +61,12 @@ func (s *Server) WSSendHanlder() http.HandlerFunc {
 
 		conn, err := upgrader.Upgrade(writer, request, nil)
 		if err != nil {
-			log.Println(err.Error())
+			log.Warn("WS upgrade failed: ", err.Error())
 			return
 		}
 
 		if err = s.coreController.LoadSenderBroker(sessionID, conn); err != nil {
-			log.Println(err.Error())
+			log.Warn("Loading WSBroker failed:", err.Error())
 			return
 		}
 	}
@@ -95,14 +86,16 @@ func (s *Server) Receive() http.HandlerFunc {
 
 		session, err := s.coreController.GetFileTransferSession(sessionID)
 		if err != nil {
-			respondError(writer, http.StatusBadRequest, "Session does not exist.")
+			respondError(writer, http.StatusBadRequest, decodeError(err))
 			return
 		}
 
 		sessionInfo := session.Info()
 		// TODO: let receiver through and perform check at receive step 2
 		if sessionInfo.NumReceivers > 1 {
-			respondError(writer, http.StatusForbidden, "Session already have a receiver.")
+			respondError(writer, 
+				http.StatusForbidden, 
+				"Session already have a receiver. Please wait for current receiver to finish downloading or ask sender to create a new transfer session.")
 			return
 		}
 
@@ -112,6 +105,7 @@ func (s *Server) Receive() http.HandlerFunc {
 
 func (s *Server) Download() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
+		// set default headers (for error case)
 		writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
 		writer.Header().Set("Content-Disposition", "attachment; filename=ERROR")
 		writer.Header().Set("Content-Length", "0")
@@ -124,8 +118,7 @@ func (s *Server) Download() http.HandlerFunc {
 
 		session, err := s.coreController.GetFileTransferSession(sessionID)
 		if err != nil {
-			log.Println(err.Error())
-			// http.Error(writer, "Failed to retrieve session", http.StatusBadRequest)
+			log.Warn("Attempting to download from non-existent session:", err.Error())
 			writer.WriteHeader(http.StatusNoContent)
 			return
 		}
@@ -136,12 +129,10 @@ func (s *Server) Download() http.HandlerFunc {
 
 		receiveChan, err := session.ReceiveFileByPump(sessionID, 0, sessionInfo.FileSize)
 		if err != nil {
-			// http.Error(writer, "Unable to get file from sender", http.StatusBadRequest)
 			writer.WriteHeader(http.StatusNoContent)
 			return
 		}
 
-		// writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
 		writer.Header().Set("Content-Disposition", "attachment; filename=\""+sessionInfo.FileName+"\"")
 		writer.Header().Set("Content-Length", strconv.FormatInt(sessionInfo.FileSize, 10))
 		writer.WriteHeader(http.StatusOK) // TODO: allow for partial contents
@@ -150,8 +141,7 @@ func (s *Server) Download() http.HandlerFunc {
 			// chunk has been pulled; write to receiver
 			_, err := writer.Write(chunk)
 			if err != nil {
-				log.Println("Unable to write to receiver.")
-				log.Println(err)
+				log.Warn("Unable to send data to Receiver:", err.Error())
 				return
 			}
 			writer.(http.Flusher).Flush()

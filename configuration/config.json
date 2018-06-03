@@ -3,6 +3,8 @@
     "port": "9090",
     "maxTransferSessions": 100,
     "senderConnectWsTimeoutS": 15,
+    "logLevel": 0,
+    "logToFile": false,
 
     "_comment": "shared configs",
     "maxFileSize":  5368709120,

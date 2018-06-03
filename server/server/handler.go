@@ -1,7 +1,9 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
+	"retifish/server/config"
 	log "retifish/server/logger"
 	"strconv"
 
@@ -14,24 +16,43 @@ func (s *Server) InitSendHanlder() http.HandlerFunc {
 		SessionID string `json:"sessionID"`
 	}
 
-	return func(writer http.ResponseWriter, request *http.Request) {
-		params := request.URL.Query()
-		fileName := params.Get("fileName")
-		fileSize := params.Get("fileSize")
-		passcode := params.Get("passcode")
+	type JSONBody struct {
+		FileName string `json:"fileName"`
+		FileSize int64  `json:"fileSize"`
+		FileType string `json:"fileType"`
+	}
 
-		if fileName == "" || fileSize == "" {
-			respondError(writer, http.StatusBadRequest, "Insufficient parameters.")
+	return func(writer http.ResponseWriter, request *http.Request) {
+		// params := request.URL.Query()
+		// fileName := params.Get("fileName")
+		// fileSize := params.Get("fileSize")
+		// passcode := params.Get("passcode")
+
+		// if fileName == "" || fileSize == "" {
+		// 	respondError(writer, http.StatusBadRequest, "Insufficient parameters.")
+		// 	return
+		// }
+
+		// fileSize64, err := strconv.ParseInt(fileSize, 10, 64)
+		var payload JSONBody
+		if err := json.NewDecoder(request.Body).Decode(&payload); err != nil {
+			respondError(writer, http.StatusBadRequest, "Invalid body.")
 			return
 		}
 
-		fileSize64, err := strconv.ParseInt(fileSize, 10, 64)
-		if err != nil || fileSize64 <= 0 || fileSize64 > 1073741824 {
+		if payload.FileName == "" {
+			respondError(writer, http.StatusBadRequest, "No file name.")
+			return
+		}
+
+		if payload.FileSize <= 0 || payload.FileSize > config.Values.MaxFileSize {
 			respondError(writer, http.StatusBadRequest, "Invalid file size.")
 			return
 		}
 
-		sessionID, err := s.coreController.InitTransferSession(fileName, passcode, fileSize64)
+		sessionID, err := s.coreController.InitTransferSession(
+			payload.FileName, payload.FileType, "NO PASSCODE", payload.FileSize)
+
 		if err != nil {
 			respondError(writer, http.StatusInternalServerError, decodeError(err))
 			return
@@ -50,14 +71,8 @@ func (s *Server) WSSendHanlder() http.HandlerFunc {
 	}
 
 	return func(writer http.ResponseWriter, request *http.Request) {
-		params := request.URL.Query()
-		sessionID := params.Get("sessionID")
-
-		if sessionID == "" {
-			writer.WriteHeader(http.StatusBadRequest)
-			writer.Write([]byte("Insufficient url parameters."))
-			return
-		}
+		vars := mux.Vars(request)
+		sessionID := vars["sessionID"]
 
 		conn, err := upgrader.Upgrade(writer, request, nil)
 		if err != nil {
@@ -67,6 +82,7 @@ func (s *Server) WSSendHanlder() http.HandlerFunc {
 
 		if err = s.coreController.LoadSenderBroker(sessionID, conn); err != nil {
 			log.Warn("Loading WSBroker failed:", err.Error())
+			conn.Close()
 			return
 		}
 	}
@@ -77,7 +93,7 @@ func (s *Server) Receive() http.HandlerFunc {
 		SessionID string `json:"sessionID"`
 		FileName  string `json:"fileName"`
 		FileSize  int64  `json:"fileSize"`
-		// FileType  string `json:"fileType"`
+		FileType  string `json:"fileType"`
 	}
 
 	return func(writer http.ResponseWriter, request *http.Request) {
@@ -93,13 +109,16 @@ func (s *Server) Receive() http.HandlerFunc {
 		sessionInfo := session.Info()
 		// TODO: let receiver through and perform check at receive step 2
 		if sessionInfo.NumReceivers > 1 {
-			respondError(writer, 
-				http.StatusForbidden, 
+			respondError(writer,
+				http.StatusForbidden,
 				"Session already have a receiver. Please wait for current receiver to finish downloading or ask sender to create a new transfer session.")
 			return
 		}
 
-		respondJSON(writer, http.StatusOK, response{sessionID, sessionInfo.FileName, sessionInfo.FileSize})
+		respondJSON(
+			writer,
+			http.StatusOK,
+			response{sessionID, sessionInfo.FileName, sessionInfo.FileSize, sessionInfo.FileType})
 	}
 }
 
@@ -157,6 +176,8 @@ func (s *Server) Info() http.HandlerFunc {
 			http.Error(writer, "", http.StatusUnauthorized)
 			return
 		}
+
+		// TODO: also show configs
 
 		respondJSON(writer, http.StatusOK, s.coreController.Info())
 	}

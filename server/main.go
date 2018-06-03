@@ -31,11 +31,11 @@ func main() {
 	apiRouter.HandleFunc("/info", serv.Info()).Methods("GET")
 
 	wsRouter := router.PathPrefix("/websocket").Subrouter()
-	wsRouter.HandleFunc("/send", serv.WSSendHanlder()).Methods("GET")
+	wsRouter.HandleFunc("/send/{sessionID}", serv.WSSendHanlder()).Methods("GET")
 
 	headersOk := handlers.AllowedHeaders([]string{"*"})
 	originsOk := handlers.AllowedOrigins([]string{"*"})
-	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	methodsOk := handlers.AllowedMethods([]string{"OPTIONS", "GET", "HEAD", "POST", "PUT"})
 	serverHandler := handlers.CORS(originsOk, headersOk, methodsOk)(router)
 
 	log.Info("Server started on port", config.Values.Port)

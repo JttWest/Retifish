@@ -1,8 +1,8 @@
 package model
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 	"retifish/server/config"
 	"retifish/server/controller/model/websocket_broker"
 	log "retifish/server/logger"
@@ -23,6 +23,7 @@ type FileTransferSession struct {
 	mu           sync.RWMutex
 	FileName     string
 	FileSize     int64
+	FileType     string
 	Passcode     string // optional passcode to validate receiver
 	CreateTime   time.Time
 	numReceivers int
@@ -32,6 +33,7 @@ type FileTransferSession struct {
 type fileTransferSessionInfo struct {
 	FileName     string
 	FileSize     int64
+	FileType     string
 	Passcode     string // optional passcode to validate receiver
 	CreateTime   time.Time
 	NumReceivers int
@@ -60,7 +62,7 @@ func (fts *FileTransferSession) Info() fileTransferSessionInfo {
 	fts.mu.RLock()
 	defer fts.mu.RUnlock()
 
-	return fileTransferSessionInfo{fts.FileName, fts.FileSize, fts.Passcode, fts.CreateTime, fts.numReceivers}
+	return fileTransferSessionInfo{fts.FileName, fts.FileSize, fts.FileType, fts.Passcode, fts.CreateTime, fts.numReceivers}
 }
 
 func (fts *FileTransferSession) IncReceiverCounter() {

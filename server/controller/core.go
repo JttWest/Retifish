@@ -20,7 +20,7 @@ func NewCore() *Core {
 	}
 }
 
-func (c *Core) InitTransferSession(fileName, passcode string, fileSize int64) (string, error) {
+func (c *Core) InitTransferSession(fileName, fileType, passcode string, fileSize int64) (string, error) {
 	randUUID, err := uuid.NewV4()
 	if err != nil {
 		return "", errors.New("failed to create UUID")
@@ -29,6 +29,7 @@ func (c *Core) InitTransferSession(fileName, passcode string, fileSize int64) (s
 	newSession := &model.FileTransferSession{
 		FileName:   fileName,
 		FileSize:   fileSize,
+		FileType: fileType,
 		Passcode:   passcode,
 		CreateTime: time.Now(),
 	}

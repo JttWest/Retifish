@@ -16,6 +16,7 @@ type Config struct {
 	TransferChunkSize       int
 	LogLevel                int
 	LogToFile               bool
+	MaxFileSize             int64
 }
 
 var Values Config

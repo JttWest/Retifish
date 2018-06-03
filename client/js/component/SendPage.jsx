@@ -167,8 +167,8 @@ class Send extends Component {
   establishSenderWS(sessionID, file) {
     return new Promise((resolve, reject) => {
       const fileReader = new FileReader()
-      const ws = new WebSocket(`${wsSendEndpoint}?sessionID=${sessionID}`)
-
+      const ws = new WebSocket(`${wsSendEndpoint}/${sessionID}`)
+      
       ws.onerror = (err) => {
         console.log(err)
         reject(err)
@@ -181,8 +181,6 @@ class Send extends Component {
       }
 
       ws.onopen = () => {
-        console.log('Opened websocket')
-
         ws.onmessage = (payload) => {
           const message = JSON.parse(payload.data)
 
@@ -207,7 +205,12 @@ class Send extends Component {
     const file = this.state.selectedFile
 
     try {
-      const resp = await axios.post(`${initSendEndpoint}?fileName=${file.name}&fileSize=${file.size}`)
+      const resp = await axios.post(initSendEndpoint, JSON.stringify({
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type
+      }))
+
       const ws = await this.establishSenderWS(resp.data.sessionID, file)
 
       this.senderWS = ws

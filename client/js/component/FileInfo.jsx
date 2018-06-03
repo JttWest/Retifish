@@ -36,7 +36,7 @@ const FileInfo = props => (
               Type
             </Grid.Column>
             <Grid.Column width={valueWidth}>
-              <Input value={props.file ? props.file.type : null} fluid transparent />
+              <Input value={props.file ? props.file.type : ''} fluid transparent />
             </Grid.Column>
           </Grid.Row>
         </Grid>

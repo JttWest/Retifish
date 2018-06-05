@@ -23,17 +23,6 @@ func (s *Server) InitSendHanlder() http.HandlerFunc {
 	}
 
 	return func(writer http.ResponseWriter, request *http.Request) {
-		// params := request.URL.Query()
-		// fileName := params.Get("fileName")
-		// fileSize := params.Get("fileSize")
-		// passcode := params.Get("passcode")
-
-		// if fileName == "" || fileSize == "" {
-		// 	respondError(writer, http.StatusBadRequest, "Insufficient parameters.")
-		// 	return
-		// }
-
-		// fileSize64, err := strconv.ParseInt(fileSize, 10, 64)
 		var payload JSONBody
 		if err := json.NewDecoder(request.Body).Decode(&payload); err != nil {
 			respondError(writer, http.StatusBadRequest, "Invalid body.")
@@ -125,7 +114,6 @@ func (s *Server) Receive() http.HandlerFunc {
 func (s *Server) Download() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		// set default headers (for error case)
-		writer.Header().Set("Access-Control-Expose-Headers", "Content-Disposition")
 		writer.Header().Set("Content-Disposition", "attachment; filename=ERROR")
 		writer.Header().Set("Content-Length", "0")
 

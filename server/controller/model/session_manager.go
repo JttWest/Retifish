@@ -2,8 +2,10 @@ package model
 
 import (
 	"errors"
+	"fmt"
 	"retifish/server/config"
 	"retifish/server/controller/model/websocket_broker"
+	log "retifish/server/logger"
 	"sync"
 	"time"
 )
@@ -22,6 +24,7 @@ func (sm *SessionManager) AddTransferSession(sessionID string, fts *FileTransfer
 	defer sm.mu.Unlock()
 
 	if len(sm.fileTransferSessions) < config.Values.MaxTransferSessions {
+		log.Info(fmt.Sprintf("New Transfer Session: %v (%v bytes)", fts.FileName, fts.FileSize))
 		sm.fileTransferSessions[sessionID] = fts
 
 		// remove session if sender didn't connect WS in time

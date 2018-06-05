@@ -20,7 +20,7 @@ const FileInfo = props => (
               Name
             </Grid.Column>
             <Grid.Column width={valueWidth}>
-              <Input value={props.file ? props.file.name : ''} fluid transparent />
+              <Input value={props.file ? props.file.name : ''} fluid transparent readOnly />
             </Grid.Column>
           </Grid.Row>
           <Grid.Row>
@@ -28,7 +28,7 @@ const FileInfo = props => (
               Size
             </Grid.Column>
             <Grid.Column width={valueWidth}>
-              <Input value={props.file ? fileSizeFormat(props.file.size) : ''} fluid transparent />
+              <Input value={props.file ? fileSizeFormat(props.file.size) : ''} fluid transparent readOnly />
             </Grid.Column>
           </Grid.Row>
           <Grid.Row>
@@ -36,7 +36,7 @@ const FileInfo = props => (
               Type
             </Grid.Column>
             <Grid.Column width={valueWidth}>
-              <Input value={props.file ? props.file.type : ''} fluid transparent />
+              <Input value={props.file ? props.file.type : ''} fluid transparent readOnly />
             </Grid.Column>
           </Grid.Row>
         </Grid>

@@ -15,16 +15,13 @@
     "no-unused-expressions": ["error", { "allowTernary": true }],
     "comma-dangle":"off",
     "no-plusplus":"off",
-    "prefer-const":"off",
     "curly":"off",
     "no-mixed-operators":"off",
-    "camelcase":"warn",
     "max-len":"off",
     "no-param-reassign": ["error", { "props": false }],
     "object-shorthand":"off",
     "no-prototype-builtins":"off",
     "no-use-before-define": ["error", { "functions": false }],
-    "no-bitwise":"warn",
     "semi": ["error", "never"],
     "no-unexpected-multiline":"error",
     "jsx-a11y/anchor-is-valid": [ "error", {
@@ -33,5 +30,9 @@
     }],
     "react/require-default-props": "off",
     "react/no-multi-comp": "off"
+  },
+  "globals": {
+    "API_SERVER": true,
+    "WS_SERVER": true
   }
 }

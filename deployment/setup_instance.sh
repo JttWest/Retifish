@@ -16,3 +16,4 @@ sudo adduser retifish --disabled-login --gecos ""
 sudo mv retifish.service /lib/systemd/system/.
 sudo chmod 755 /lib/systemd/system/retifish.service
 
+#TODO nginx configs

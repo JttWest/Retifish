@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Link } from 'react-router-dom'
-import { Segment, Container, Header, Icon, Message, Button, Divider, Grid } from 'semantic-ui-react'
+import { Segment, Container, Header, Icon, Message, Button, Grid } from 'semantic-ui-react'
 
 const TransferHeader = props => (
   <Segment textAlign="center" basic>
@@ -32,30 +32,31 @@ const ShareContainer = (props) => {
     null
 
   return (
-    <div>
+    <Container>
       <TransferHeader pageTitle="Retifish" color="black" />
       <Container text>
         <Segment raised color={color}>
-          <Grid columns={3} relaxed>
-            <Grid.Column>
-              <Button as={Link} to="/" icon floated="left" color="yellow" disabled={homeDisabled} >
-                <Icon name="home" size="large" />
-              </Button>
-            </Grid.Column>
+          <Grid divided="vertically">
+            <Grid.Row columns={3}>
+              <Grid.Column>
+                <Button as={Link} to="/" icon floated="left" color="yellow" disabled={homeDisabled} >
+                  <Icon name="home" size="large" />
+                </Button>
+              </Grid.Column>
 
-            <Grid.Column>
-              <TransferHeader pageTitle={pageTitle} color={color} />
-            </Grid.Column>
+              <Grid.Column>
+                <TransferHeader pageTitle={pageTitle} color={color} />
+              </Grid.Column>
 
-            <Grid.Column />
+              <Grid.Column />
+            </Grid.Row>
           </Grid>
 
           {children}
           {messageDisplay}
         </Segment>
       </Container>
-    </div >
-
+    </Container>
   )
 }
 

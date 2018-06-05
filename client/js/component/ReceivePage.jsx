@@ -8,13 +8,8 @@ import FileInfo from './FileInfo'
 
 import error from '../lib/error'
 
-const downloadEndpoint = window.location.hostname === 'localhost' ?
-  'http://localhost:9090/api/download' :
-  `https://${window.location.host}/api/download`
-
-const receiveEndpoint = window.location.hostname === 'localhost' ?
-  'http://localhost:9090/api/receive' :
-  `https://${window.location.host}/api/receive`
+const downloadEndpoint = `${API_SERVER}/api/download`
+const receiveEndpoint = `${API_SERVER}/api/receive`
 
 class ReceiveStep1 extends Component {
   constructor(props) {
@@ -92,6 +87,11 @@ class ReceiveStep1 extends Component {
   }
 }
 
+ReceiveStep1.propTypes = {
+  onSuccess: PropTypes.func.isRequired,
+  onFail: PropTypes.func.isRequired
+}
+
 const ReceiveStep2 = props => (
   <Grid centered>
     <Grid.Row>
@@ -110,9 +110,9 @@ const ReceiveStep2 = props => (
   </Grid>
 )
 
-ReceiveStep1.propTypes = {
-  onSuccess: PropTypes.func.isRequired,
-  onFail: PropTypes.func.isRequired
+ReceiveStep2.propTypes = {
+  file: PropTypes.object.isRequired,
+  sessionID: PropTypes.string.isRequired
 }
 
 class Receive extends Component {

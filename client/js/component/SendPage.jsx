@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { Button, Grid, Icon, Container, Segment } from 'semantic-ui-react'
+import { Button, Grid, Icon } from 'semantic-ui-react'
 import axios from 'axios'
 
 import ShareContainer from './ShareContainer'
@@ -10,13 +10,9 @@ import FileInfo from './FileInfo'
 
 import error from '../lib/error'
 
-const initSendEndpoint = window.location.hostname === 'localhost' ?
-  'http://localhost:9090/api/send' :
-  `https://${window.location.host}/api/send`
 
-const wsSendEndpoint = window.location.hostname === 'localhost' ?
-  'ws://localhost:9090/websocket/send' :
-  `wss://${window.location.host}/websocket/send`
+const initSendEndpoint = `${API_SERVER}/api/send`
+const wsSendEndpoint = `${WS_SERVER}/websocket/send`
 
 const readBlobAsArrayBuffer = (blob, fileReader = undefined) => {
   const reader = fileReader || new FileReader()
@@ -168,7 +164,7 @@ class Send extends Component {
     return new Promise((resolve, reject) => {
       const fileReader = new FileReader()
       const ws = new WebSocket(`${wsSendEndpoint}/${sessionID}`)
-      
+
       ws.onerror = (err) => {
         console.log(err)
         reject(err)

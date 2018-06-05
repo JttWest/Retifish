@@ -37,7 +37,7 @@ class ShareStub extends Component {
 
     return (
       <Segment basic>
-        <Header size="medium">Share with your Receiver</Header>
+        <Header size="medium">Share with your receiver</Header>
         <div className="ui action input">
           <input type="text" value={value} readOnly ref={this.displayRef} />
           <Select

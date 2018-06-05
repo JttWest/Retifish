@@ -25,11 +25,10 @@ const MainContent = ({ mobile }) => (
       as="h1"
       content="Retifish"
       style={{
-        fontSize: mobile ? '2em' : '4em',
+        fontSize: mobile ? '2em' : '5em',
         fontWeight: 'bold',
-        fontFamily: 'arial',
         marginBottom: 0,
-        marginTop: mobile ? '1.5em' : '3em',
+        marginTop: '1.5em',
       }}
     />
     <Header
@@ -140,6 +139,10 @@ class DesktopContainer extends Component {
             <MainContent />
             <Divider hidden />
             <InfoSection info={info} />
+            <Divider hidden />
+            <Container text>
+              Have question/feedback/bug? Please email <strong>contact@retifish.com</strong>
+            </Container>
           </Segment>
         </Visibility>
 

@@ -44,7 +44,7 @@ TODO taks until MVP:
 config
 	X create folder and files
 	X add in server
-	- add in client (api endpoints)
+	X add in client (api endpoints)
 
 error handling
 	X error server
@@ -55,6 +55,8 @@ create logging
     - client
 
 fix server endpoints
+    X client
 
 cleanup client UI
-    form with input for fileInfo
+    X form with input for fileInfo
+    X contact

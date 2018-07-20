@@ -1,6 +1,7 @@
 {
     "_comment": "server configs",
     "port": "9090",
+    "corsAllowOrigin": "*",
     "maxTransferSessions": 100,
     "senderConnectWsTimeoutS": 15,
     "logLevel": 0,

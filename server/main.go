@@ -33,10 +33,12 @@ func main() {
 	wsRouter := router.PathPrefix("/websocket").Subrouter()
 	wsRouter.HandleFunc("/send/{sessionID}", serv.WSSendHanlder()).Methods("GET")
 
+	originsOk := handlers.AllowedOrigins([]string{config.Values.CorsAllowOrigin})
 	headersOk := handlers.AllowedHeaders([]string{"*"})
-	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"OPTIONS", "GET", "HEAD", "POST", "PUT"})
-	serverHandler := handlers.CORS(originsOk, headersOk, methodsOk)(router)
+	exposeHeaders := handlers.ExposedHeaders([]string{"Content-Length,Content-Range,Content-Disposition"})
+
+	serverHandler := handlers.CORS(originsOk, headersOk, methodsOk, exposeHeaders)(router)
 
 	log.Info("Server started on port", config.Values.Port)
 	err := http.ListenAndServe(fmt.Sprintf(":%v", config.Values.Port), serverHandler)

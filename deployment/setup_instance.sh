@@ -2,18 +2,26 @@
 set -e
 
 # setup nginx
-sudo apt update
-sudo apt install nginx
+apt update
+apt install nginx
 #TODO: Let's Encrypt Certs
 
 # setup firewall
-sudo ufw allow OpenSSH
-sudo ufw allow 'Nginx Full'
-sudo ufw enable
+ufw allow OpenSSH
+ufw allow 'Nginx Full'
+ufw enable
 
-sudo adduser retifish --disabled-login --gecos ""
+adduser retifish --disabled-login --gecos ""
 
-sudo mv retifish.service /lib/systemd/system/.
-sudo chmod 755 /lib/systemd/system/retifish.service
+# public directory of assets to be served
+mv -v Public/* /home/retifish/
 
-#TODO nginx configs
+# systemd service for Retifish service server
+mv retifish.service /lib/systemd/system/
+chmod 755 /lib/systemd/system/retifish.service
+systemctl enable retifish.service
+systemctl start retifish
+
+# nginx reverse-proxy
+mv retifish.conf /etc/nginx/sites-available/
+systemctl start nginx

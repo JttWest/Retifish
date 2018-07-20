@@ -1,6 +1,8 @@
 ### Systemd config for Retifish ###
 # place in /lib/systemd/system
 
+# view logs: journalctl -u retifish | less
+
 [Unit]
 Description=retifish
 ConditionPathExists=/home/retifish/retifish_service

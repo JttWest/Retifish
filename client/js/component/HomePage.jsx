@@ -28,14 +28,14 @@ const MainContent = ({ mobile }) => (
         fontSize: mobile ? '2em' : '5em',
         fontWeight: 'bold',
         marginBottom: 0,
-        marginTop: '1.5em',
+        marginTop: '1em',
       }}
     />
     <Header
       as="h2"
       content="Share any file up to 5GB for free in your browser."
       style={{
-        fontSize: mobile ? '1.5em' : '1.7em',
+        fontSize: mobile ? '1.5em' : '2em',
         fontWeight: 'normal',
         marginTop: mobile ? '0.5em' : '1.5em',
       }}
@@ -71,7 +71,7 @@ class InfoSection extends Component {
   render() {
     const { info } = this.props
     return (
-      <Container text>
+      <Container text style={{ minHeight: '180px' }}>
         <Button.Group fluid color="black" attached="top" widths={info.length}>
           {info.map(i => (
             <Button key={i.index} onClick={this.handleClick(i.index)} active={this.state.selectedTab === i.index}>{i.labelName}</Button>
@@ -115,9 +115,9 @@ class DesktopContainer extends Component {
 
     const info = [
       { index: 0, labelName: 'Free', text: 'Both sending and receiving files are completely free with no hidden fees.' },
-      { index: 1, labelName: 'Secure', text: 'All file transfer is protected with TLS protocol. Moreover, only a small chunk of your file is stored on the server at any given time, which will be cleared once the transfer is over.' },
-      { index: 2, labelName: 'Simple', text: 'No account required. No additional dependencies to download.' },
-      { index: 3, labelName: 'Fast', text: 'Unlike traditional file sharing where the whole file must be uploaded before the receiver can begin downloading, this app allows simultaneously file upload and download.' },
+      { index: 1, labelName: 'Secure', text: 'All file transfer is protected with TLS protocol. Moreover, the server only stores a small chunk of your file at any given time, which is cleared once the transfer is over.' },
+      { index: 2, labelName: 'Simple', text: 'No account required. No additional dependencies to download. A web browser with internet connection is all you need.' },
+      { index: 3, labelName: 'Fast', text: 'Unlike traditional file sharing where the whole file must be uploaded before the receiver can begin downloading, this app allows simultaneous upload and download of the file.' },
     ]
     return (
       <Responsive>
@@ -138,10 +138,9 @@ class DesktopContainer extends Component {
             </Menu> */}
             <MainContent />
             <Divider hidden />
-            <InfoSection info={info} />
-            <Divider hidden />
+            <InfoSection info={info}/>
             <Container text>
-              Have question/feedback/bug? Please email <strong>contact@retifish.com</strong>
+              Have question/feedback/bug?<br />Please email <strong>contact@retifish.com</strong>
             </Container>
           </Segment>
         </Visibility>

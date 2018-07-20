@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	Port                    string
+	CorsAllowOrigin         string
 	MaxTransferSessions     int
 	SenderConnectWsTimeoutS time.Duration
 	TransferChunkSize       int

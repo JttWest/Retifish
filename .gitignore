@@ -1,5 +1,6 @@
 # Created by https://www.gitignore.io/api/go,visualstudiocode
 logic.txt
+configuration
 
 ### Go ###
 # Binaries for programs and plugins

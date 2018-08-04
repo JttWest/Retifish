@@ -160,7 +160,7 @@ func (s *Server) Download() http.HandlerFunc {
 func (s *Server) Info() http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		pass := request.URL.Query().Get("pass")
-		if pass != "D2zJXjQ69WH8xnwxRyNUCkj2axmF4lKb2" {
+		if pass != config.Values.AdminPass {
 			http.Error(writer, "", http.StatusUnauthorized)
 			return
 		}

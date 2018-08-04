@@ -18,6 +18,7 @@ type Config struct {
 	LogLevel                int
 	LogToFile               bool
 	MaxFileSize             int64
+	AdminPass               string
 }
 
 var Values Config
